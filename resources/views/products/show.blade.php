@@ -60,7 +60,11 @@
                     </div>
 
                     @auth
-                    @if(auth()->user()->role === 'buyer')
+                    @if(auth()->user()->id === $product->seller_id)
+                    <p class="text-sm text-gray-400 text-center">
+                       امکان خرید محصول خود وجود ندارد
+                    </p>
+                    @elseif(auth()->user()->role === 'buyer' || auth()->user()->role === 'seller')
                     <form method="POST" action="#">
                         @csrf
                         <button type="submit"
@@ -68,10 +72,6 @@
                             خرید محصول
                         </button>
                     </form>
-                    @elseif(auth()->user()->role === 'seller')
-                    <p class="text-sm text-gray-400 text-center">
-                        فروشندگان نمی‌توانند خرید کنند
-                    </p>
                     @endif
                     @else
                     <a href="{{ route('login') }}"

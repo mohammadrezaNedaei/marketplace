@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,33 +8,42 @@
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="bg-gray-50 text-gray-900 min-h-screen">
 
-<nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-    <a href="{{ route('home') }}" class="text-xl font-bold tracking-tight">مارکت‌پلیس</a>
-    <div class="flex items-center gap-4 text-sm">
-        <a href="{{ route('explore') }}" class="hover:text-black text-gray-500">کاوش</a>
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <a href="{{ route('home') }}" class="text-xl font-bold tracking-tight">مارکت‌پلیس</a>
+        <div class="flex items-center gap-4 text-sm">
+            <a href="{{ route('explore') }}" class="hover:text-black text-gray-500">کاوش</a>
 
-        @auth
-            <span class="text-gray-500">{{ auth()->user()->username }}</span>
+            @auth
+            @php
+            $dashboardRoute = match(auth()->user()->role) {
+            'seller' => route('seller.dashboard'),
+            'admin' => route('admin.dashboard'),
+            default => route('buyer.dashboard'),
+            };
+            @endphp
+            <a class="text-gray-500" href="{{ $dashboardRoute }}">{{ auth()->user()->username }}</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="text-gray-500 hover:text-black">خروج</button>
             </form>
-        @else
+            @else
             <a href="{{ route('login') }}" class="hover:text-black text-gray-500">ورود</a>
             <a href="{{ route('register') }}" class="bg-black text-white px-4 py-1.5 rounded-full hover:bg-gray-800">ثبت‌نام</a>
-        @endauth
-    </div>
-</nav>
+            @endauth
+        </div>
+    </nav>
 
-<main class="max-w-6xl mx-auto px-4 py-8">
-    @yield('content')
-</main>
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        @yield('content')
+    </main>
 
-<footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100 mt-12">
-    © {{ date('Y') }} مارکت‌پلیس
-</footer>
+    <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100 mt-12">
+        © {{ date('Y') }} مارکت‌پلیس
+    </footer>
 
 </body>
+
 </html>
