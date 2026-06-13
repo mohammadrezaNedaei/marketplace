@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -119,5 +120,41 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('seller.dashboard')->with('success', 'محصول با موفقیت حذف شد');
+    }
+
+    public function analytics()
+    {
+        $sellerId = Auth::id();
+
+        $products = Product::where('seller_id', $sellerId)->get();
+
+        $orders = Order::whereHas('product', fn($q) => $q->where('seller_id', $sellerId))
+            ->with('product')
+            ->latest('created_at')
+            ->get();
+
+        $totalViews = $products->sum('views');
+        $totalSales = $products->sum('sales_count');
+        $totalRevenue = $orders->where('status', 'paid')->sum('amount');
+
+        $thisMonth = $orders->filter(
+            fn($o) => \Carbon\Carbon::parse($o->created_at)->isCurrentMonth()
+        );
+
+        $chartData = $products->map(fn($p) => [
+            'title'  => $p->title,
+            'views'  => $p->views,
+            'sales'  => $p->sales_count,
+        ]);
+
+        return view('seller.analytics', compact(
+            'products',
+            'orders',
+            'totalViews',
+            'totalSales',
+            'totalRevenue',
+            'thisMonth',
+            'chartData',
+        ));
     }
 }

@@ -5,10 +5,16 @@
 @section('content')
 <div class="flex items-center justify-between mb-8">
     <h1 class="text-2xl font-bold">محصولات من</h1>
-    <a href="{{ route('seller.products.create') }}"
-        class="bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800">
-        + افزودن محصول
-    </a>
+    <div class="flex gap-3">
+        <a href="{{ route('seller.analytics') }}"
+            class="border border-gray-300 px-5 py-2 rounded-full text-sm hover:bg-gray-50 transition">
+            آنالیتیکس
+        </a>
+        <a href="{{ route('seller.products.create') }}"
+            class="bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800">
+            + افزودن محصول
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
