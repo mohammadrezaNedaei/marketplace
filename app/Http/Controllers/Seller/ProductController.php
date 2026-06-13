@@ -28,13 +28,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'price'          => 'required|numeric|min:0',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'category_id'    => 'required|exists:categories,id',
-            'picture'        => 'required|image|mimes:jpg,jpeg,png|max:5120',
-            'file'           => 'nullable|file|max:20480',
+            'category_id' => 'required|exists:categories,id',
+            'picture' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'file' => 'nullable|file|max:20480',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $picturePath = $request->file('picture')->store('products/pictures', 'public');
@@ -45,15 +46,15 @@ class ProductController extends Controller
         }
 
         Product::create([
-            'seller_id'      => Auth::id(),
-            'category_id'    => $request->category_id,
-            'title'          => $request->title,
-            'description'    => $request->description,
-            'price'          => $request->price,
+            'seller_id' => Auth::id(),
+            'category_id' => $request->category_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
             'discount_price' => $request->discount_price,
-            'picture_url'    => $picturePath,
-            'file_url'       => $filePath,
-            'status'         => 'active',
+            'picture_url' => $picturePath,
+            'file_url' => $filePath,
+            'status' => 'active',
         ]);
 
         return redirect()->route('seller.dashboard')->with('success', 'محصول با موفقیت اضافه شد');
@@ -76,13 +77,13 @@ class ProductController extends Controller
         }
 
         $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'price'          => 'required|numeric|min:0',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'category_id'    => 'required|exists:categories,id',
-            'picture'        => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
-            'file'           => 'nullable|file|max:20480',
+            'category_id' => 'required|exists:categories,id',
+            'picture' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'file' => 'nullable|file|max:20480',
         ]);
 
         // اگر عکس جدید آپلود شد
@@ -97,12 +98,12 @@ class ProductController extends Controller
             $product->file_url = $filePath;
         }
 
-        $product->title          = $request->title;
-        $product->description    = $request->description;
-        $product->price          = $request->price;
+        $product->title = $request->title;
+        $product->description = $request->description;
+        $product->price = $request->price;
         $product->discount_price = $request->discount_price;
-        $product->category_id    = $request->category_id;
-
+        $product->category_id = $request->category_id;
+        $product->status = $request->status;
         $product->save();
 
         return redirect()->route('seller.dashboard')->with('success', 'محصول با موفقیت ویرایش شد');

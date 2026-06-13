@@ -12,7 +12,7 @@
 <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
     <a href="{{ route('home') }}" class="text-xl font-bold tracking-tight">مارکت‌پلیس</a>
     <div class="flex items-center gap-4 text-sm">
-        <a href="#" class="hover:text-black text-gray-500">کاوش</a>
+        <a href="{{ route('explore') }}" class="hover:text-black text-gray-500">کاوش</a>
 
         @auth
             <span class="text-gray-500">{{ auth()->user()->username }}</span>

@@ -47,3 +47,7 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::put('/products/{product}', [App\Http\Controllers\Seller\ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [App\Http\Controllers\Seller\ProductController::class, 'destroy'])->name('products.destroy');
 });
+
+Route::get('/explore', [App\Http\Controllers\ExploreController::class, 'index'])->name('explore');
+Route::get('/api/products', [App\Http\Controllers\ExploreController::class, 'products'])->name('api.products');
+Route::get('/products/{product}', [App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
