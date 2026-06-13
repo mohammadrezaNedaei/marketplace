@@ -36,7 +36,6 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'picture' => 'required|image|mimes:jpg,jpeg,png|max:5120',
             'file' => 'nullable|file|max:20480',
-            'status' => 'required|in:active,inactive',
         ]);
 
         $picturePath = $request->file('picture')->store('products/pictures', 'public');
