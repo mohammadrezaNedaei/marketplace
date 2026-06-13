@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\ProductView;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -13,17 +15,47 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product->increment('views');
+        $this->recordView($product);
 
         $product->load([
             'seller:id,username',
             'category:id,name',
             'reviews' => fn($q) => $q->where('approved', true)
-                                     ->whereNull('answer_to_id')
-                                     ->with(['user:id,username', 'replies.user:id,username'])
-                                     ->latest('created_at'),
+                ->whereNull('answer_to_id')
+                ->with(['user:id,username', 'replies.user:id,username'])
+                ->latest('created_at'),
         ]);
 
         return view('products.show', compact('product'));
+    }
+
+    private function recordView(Product $product): void
+    {
+        $isOwner = Auth::check() && Auth::id() === $product->seller_id;
+
+        if ($isOwner) {
+            return;
+        }
+
+        if (Auth::check()) {
+            $alreadyViewed = ProductView::where('product_id', $product->id)
+                                       ->where('user_id', Auth::id())
+                                       ->exists();
+
+            if (!$alreadyViewed) {
+                ProductView::create([
+                    'product_id' => $product->id,
+                    'user_id' => Auth::id(),
+                ]);
+                $product->increment('views');
+            }
+        } else {
+            $viewedKey = 'viewed_product_' . $product->id;
+
+            if (!session()->has($viewedKey)) {
+                session()->put($viewedKey, true);
+                $product->increment('views');
+            }
+        }
     }
 }
