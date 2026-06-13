@@ -51,3 +51,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
 Route::get('/explore', [App\Http\Controllers\ExploreController::class, 'index'])->name('explore');
 Route::get('/api/products', [App\Http\Controllers\ExploreController::class, 'products'])->name('api.products');
 Route::get('/products/{product}', [App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/orders/{product}', [App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+});

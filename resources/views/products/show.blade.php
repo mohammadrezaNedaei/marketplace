@@ -60,18 +60,36 @@
                     </div>
 
                     @auth
-                    @if(auth()->user()->id === $product->seller_id)
+                    @if(Auth::user()->id === $product->seller_id)
                     <p class="text-sm text-gray-400 text-center">
-                       امکان خرید محصول خود وجود ندارد
+                        امکان خرید محصول خود وجود ندارد
                     </p>
-                    @elseif(auth()->user()->role === 'buyer' || auth()->user()->role === 'seller')
-                    <form method="POST" action="#">
+                    @elseif(Auth::user()->role === 'buyer')
+                    @php
+                    $alreadyBought = Auth::user()->orders
+                    ->where('product_id', $product->id)
+                    ->where('status', 'paid')
+                    ->first();
+                    @endphp
+
+                    @if($alreadyBought)
+                    <a href="{{ route('orders.show', $alreadyBought) }}"
+                        class="block text-center w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition font-medium">
+                        مشاهده محصول خریداری شده
+                    </a>
+                    @else
+                    <form method="POST" action="{{ route('orders.store', $product) }}">
                         @csrf
                         <button type="submit"
                             class="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium">
                             خرید محصول
                         </button>
                     </form>
+                    @endif
+                    @else
+                    <p class="text-sm text-gray-400 text-center">
+                        فروشندگان نمی‌توانند خرید کنند
+                    </p>
                     @endif
                     @else
                     <a href="{{ route('login') }}"

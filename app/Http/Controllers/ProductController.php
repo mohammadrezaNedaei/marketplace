@@ -25,6 +25,9 @@ class ProductController extends Controller
                 ->with(['user:id,username', 'replies.user:id,username'])
                 ->latest('created_at'),
         ]);
+        if (Auth::check()) {
+            Auth::user()->load('orders');
+        }
 
         return view('products.show', compact('product'));
     }
@@ -39,8 +42,8 @@ class ProductController extends Controller
 
         if (Auth::check()) {
             $alreadyViewed = ProductView::where('product_id', $product->id)
-                                       ->where('user_id', Auth::id())
-                                       ->exists();
+                ->where('user_id', Auth::id())
+                ->exists();
 
             if (!$alreadyViewed) {
                 ProductView::create([

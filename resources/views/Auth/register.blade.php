@@ -21,7 +21,7 @@
 
         {{-- شماره موبایل --}}
         <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">شماره موبایل (اختیاری)</label>
+            <label class="block text-sm font-medium mb-1">شماره موبایل</label>
             <input type="text" name="phone" value="{{ old('phone') }}"
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black">
             @error('phone')
