@@ -9,7 +9,6 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
-        {{-- نام کاربری --}}
         <div class="mb-4">
             <label class="block text-sm font-medium mb-1">نام کاربری</label>
             <input type="text" name="username" value="{{ old('username') }}"
@@ -19,7 +18,6 @@
             @enderror
         </div>
 
-        {{-- شماره موبایل --}}
         <div class="mb-4">
             <label class="block text-sm font-medium mb-1">شماره موبایل</label>
             <input type="text" name="phone" value="{{ old('phone') }}"
@@ -29,7 +27,6 @@
             @enderror
         </div>
 
-        {{-- رمز عبور --}}
         <div class="mb-4">
             <label class="block text-sm font-medium mb-1">رمز عبور</label>
             <input type="password" name="password"
@@ -39,14 +36,12 @@
             @enderror
         </div>
 
-        {{-- تکرار رمز عبور --}}
         <div class="mb-4">
             <label class="block text-sm font-medium mb-1">تکرار رمز عبور</label>
             <input type="password" name="password_confirmation"
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black">
         </div>
 
-        {{-- نقش --}}
         <div class="mb-6">
             <label class="block text-sm font-medium mb-1">نقش</label>
             <select name="role"

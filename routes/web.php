@@ -47,13 +47,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/products/{product}', [App\Http\Controllers\Admin\AdminController::class, 'deleteProduct'])->name('products.delete');
 });
 
-// مسیرهای خریدار
-Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
-    Route::get('/dashboard', function () {
-        return 'داشبورد خریدار — به زودی';
-    })->name('dashboard');
-});
-
 // مسیرهای فروشنده
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Seller\ProductController::class, 'index'])->name('dashboard');

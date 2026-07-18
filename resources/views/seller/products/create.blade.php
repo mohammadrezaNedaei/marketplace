@@ -10,7 +10,6 @@
           class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-6">
         @csrf
 
-        {{-- عنوان --}}
         <div>
             <label class="block text-sm font-medium mb-1">عنوان محصول</label>
             <input type="text" name="title" value="{{ old('title') }}"
@@ -20,7 +19,6 @@
             @enderror
         </div>
 
-        {{-- دسته‌بندی --}}
         <div>
             <label class="block text-sm font-medium mb-1">دسته‌بندی</label>
             <select name="category_id"
@@ -37,7 +35,6 @@
             @enderror
         </div>
 
-        {{-- توضیحات --}}
         <div>
             <label class="block text-sm font-medium mb-1">توضیحات</label>
             <textarea name="description" rows="4"
@@ -47,7 +44,6 @@
             @enderror
         </div>
 
-        {{-- قیمت --}}
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium mb-1">قیمت (تومان)</label>
@@ -67,7 +63,6 @@
             </div>
         </div>
 
-        {{-- عکس محصول --}}
         <div>
             <label class="block text-sm font-medium mb-1">عکس محصول</label>
             <input type="file" name="picture" accept="image/*"
@@ -77,7 +72,6 @@
             @enderror
         </div>
 
-        {{-- فایل دیجیتال --}}
         <div>
             <label class="block text-sm font-medium mb-1">فایل دیجیتال (اختیاری)</label>
             <input type="file" name="file"

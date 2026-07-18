@@ -6,18 +6,15 @@
 
 <div class="max-w-4xl mx-auto">
 
-    {{-- بخش اصلی محصول --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
         <div class="md:flex">
 
-            {{-- عکس --}}
             <div class="md:w-1/2">
                 <img src="{{ asset('storage/' . $product->picture_url) }}"
                     alt="{{ $product->title }}"
                     class="w-full h-80 object-cover">
             </div>
 
-            {{-- اطلاعات --}}
             <div class="md:w-1/2 p-8 flex flex-col justify-between">
                 <div>
                     <span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
@@ -42,7 +39,6 @@
                     @endif
                 </div>
 
-                {{-- قیمت و خرید --}}
                 <div>
                     <div class="mb-4">
                         @if($product->discount_price)
@@ -117,7 +113,6 @@
         </div>
     </div>
 
-    {{-- بخش نظرات --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
         <h2 class="text-lg font-bold mb-6">نظرات ({{ $product->reviews->count() }})</h2>
 
@@ -146,7 +141,6 @@
         @endif
         @endauth
 
-        {{-- لیست نظرات --}}
         @forelse($product->reviews as $review)
         <div class="border-b border-gray-100 pb-6 mb-6 last:border-0">
             <div class="flex items-center justify-between mb-2">

@@ -19,7 +19,6 @@ class SupportTicket extends Model
         return $this->belongsTo(User::class);
     }
 
-    // یک تیکت می‌تواند چندین پیام داشته باشد
     public function messages()
     {
         return $this->hasMany(TicketMessage::class, 'ticket_id');

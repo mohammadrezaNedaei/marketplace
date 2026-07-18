@@ -74,7 +74,6 @@
             </select>
         </div>
 
-        {{-- عکس فعلی --}}
         <div>
             <label class="block text-sm font-medium mb-2">عکس فعلی</label>
             <img src="{{ asset('storage/' . $product->picture_url) }}"

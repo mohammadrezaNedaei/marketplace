@@ -4,7 +4,6 @@
 
 @section('content')
 
-{{-- هدر --}}
 <div class="flex items-center justify-between mb-8">
     <h1 class="text-2xl font-bold">آنالیتیکس فروش</h1>
     <a href="{{ route('seller.dashboard') }}"
@@ -13,7 +12,6 @@
     </a>
 </div>
 
-{{-- کارت‌های آمار کلی --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <p class="text-gray-400 text-xs mb-1">کل بازدید</p>
@@ -33,13 +31,11 @@
     </div>
 </div>
 
-{{-- چارت بازدید و فروش --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
     <h2 class="font-bold mb-6">بازدید و فروش هر محصول</h2>
     <canvas id="productChart" height="100"></canvas>
 </div>
 
-{{-- پرفروش‌ترین این ماه --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
     <h2 class="font-bold mb-4">سفارشات این ماه</h2>
 
@@ -64,7 +60,6 @@
     @endif
 </div>
 
-{{-- جدول همه سفارشات --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
     <h2 class="font-bold mb-4">همه سفارشات</h2>
 
@@ -100,7 +95,6 @@
     @endif
 </div>
 
-{{-- Chart.js --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const chartData = @json($chartData);

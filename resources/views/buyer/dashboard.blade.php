@@ -6,7 +6,6 @@
 
 <h1 class="text-2xl font-bold mb-8">داشبورد من</h1>
 
-{{-- خریدها --}}
 <div class="mb-10" x-data="section('/buyer/api/orders')">
     <h2 class="text-lg font-bold mb-4">خریدهای من
         <span class="text-gray-400 text-sm font-normal" x-show="total > 0" x-text="'(' + total + ')'"></span>
@@ -40,7 +39,6 @@
         </template>
     </div>
 
-    {{-- خالی --}}
     <div x-show="items.length === 0 && !isLoading"
         class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-gray-400">
         <p>هنوز خریدی انجام نداده‌اید</p>
@@ -49,12 +47,10 @@
         </a>
     </div>
 
-    {{-- لودینگ --}}
     <div x-show="isLoading" class="flex justify-center mt-6">
         <div class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    {{-- بارگذاری بیشتر --}}
     <div x-show="hasMore && !isLoading" class="flex justify-center mt-6">
         <button @click="loadMore()"
             class="border border-gray-300 px-8 py-2 rounded-full text-sm hover:bg-gray-50 transition">
@@ -63,7 +59,6 @@
     </div>
 </div>
 
-{{-- ذخیره‌ها --}}
 <div x-data="section('/buyer/api/saves')">
     <h2 class="text-lg font-bold mb-4">ذخیره‌های من
         <span class="text-gray-400 text-sm font-normal" x-show="total > 0" x-text="'(' + total + ')'"></span>
@@ -83,18 +78,15 @@
         </template>
     </div>
 
-    {{-- خالی --}}
     <div x-show="items.length === 0 && !isLoading"
         class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-gray-400">
         <p>هنوز محصولی ذخیره نکرده‌اید</p>
     </div>
 
-    {{-- لودینگ --}}
     <div x-show="isLoading" class="flex justify-center mt-6">
         <div class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    {{-- بارگذاری بیشتر --}}
     <div x-show="hasMore && !isLoading" class="flex justify-center mt-6">
         <button @click="loadMore()"
             class="border border-gray-300 px-8 py-2 rounded-full text-sm hover:bg-gray-50 transition">

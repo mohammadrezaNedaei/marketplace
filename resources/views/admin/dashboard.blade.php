@@ -6,7 +6,6 @@
 
 <h1 class="text-2xl font-bold mb-8">پنل ادمین</h1>
 
-{{-- آمار کلی --}}
 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <p class="text-gray-400 text-xs mb-1">کل کاربران</p>
@@ -29,7 +28,7 @@
         <p class="text-2xl font-bold {{ $openTickets === 0 ? 'text-green-500' : 'text-red-500' }}">{{ number_format($openTickets) }}</p>
     </div>
 </div>
-{{-- فعالیت‌های اخیر --}}
+
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
     <h2 class="font-bold mb-4">آخرین فعالیت‌ها</h2>
 
@@ -51,7 +50,7 @@
     </div>
     @endif
 </div>
-{{-- لینک‌های سریع --}}
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <a href="{{ route('admin.users') }}"
         class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">

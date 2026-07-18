@@ -9,7 +9,6 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        {{-- نام کاربری --}}
         <div class="mb-4">
             <label class="block text-sm font-medium mb-1">نام کاربری</label>
             <input type="text" name="username" value="{{ old('username') }}"
@@ -19,7 +18,6 @@
             @enderror
         </div>
 
-        {{-- رمز عبور --}}
         <div class="mb-6">
             <label class="block text-sm font-medium mb-1">رمز عبور</label>
             <input type="password" name="password"

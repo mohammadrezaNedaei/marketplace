@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
 {
-    // لیست تیکت‌های کاربر
+
     public function index()
     {
         $tickets = SupportTicket::where('user_id', Auth::id())
@@ -19,13 +19,11 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets'));
     }
 
-    // فرم ایجاد تیکت جدید
     public function create()
     {
         return view('tickets.create');
     }
 
-    // ذخیره تیکت جدید
     public function store(Request $request)
     {
         $request->validate([
@@ -39,7 +37,6 @@ class TicketController extends Controller
             'status'  => 'open',
         ]);
 
-        // اولین پیام را هم ذخیره کن
         TicketMessage::create([
             'ticket_id' => $ticket->id,
             'user_id'   => Auth::id(),
@@ -50,10 +47,8 @@ class TicketController extends Controller
                          ->with('success', 'تیکت با موفقیت ارسال شد');
     }
 
-    // نمایش تیکت و پیام‌ها
     public function show(SupportTicket $ticket)
     {
-        // فقط صاحب تیکت می‌تواند آن را ببیند
         if ($ticket->user_id !== Auth::id()) {
             abort(403);
         }
@@ -63,7 +58,6 @@ class TicketController extends Controller
         return view('tickets.show', compact('ticket'));
     }
 
-    // ارسال پیام جدید در تیکت
     public function reply(Request $request, SupportTicket $ticket)
     {
         if ($ticket->user_id !== Auth::id()) {
@@ -84,7 +78,6 @@ class TicketController extends Controller
             'message'   => $request->message,
         ]);
 
-        // وقتی کاربر پیام می‌دهد تیکت دوباره open می‌شود
         $ticket->status = 'open';
         $ticket->save();
 

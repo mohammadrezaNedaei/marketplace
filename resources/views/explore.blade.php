@@ -8,7 +8,6 @@
 
     <h1 class="text-2xl font-bold mb-6">کاوش محصولات</h1>
 
-    {{-- فیلترها --}}
     <div class="flex flex-wrap gap-3 mb-6">
 
         <input type="text" x-model="search"
@@ -38,10 +37,8 @@
 
     </div>
 
-    {{-- تعداد نتایج --}}
     <p class="text-sm text-gray-400 mb-4" x-text="total + ' محصول یافت شد'"></p>
 
-    {{-- گرید محصولات --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <template x-for="product in products" :key="product.id">
             <a :href="product.url"
@@ -76,17 +73,14 @@
         </template>
     </div>
 
-    {{-- هیچ نتیجه‌ای نبود --}}
     <div x-show="products.length === 0 && !isLoading" class="text-center text-gray-400 mt-20">
         <p class="text-lg">محصولی یافت نشد</p>
     </div>
 
-    {{-- لودینگ --}}
     <div x-show="isLoading" class="flex justify-center mt-10">
         <div class="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    {{-- دکمه بارگذاری بیشتر --}}
     <div x-show="hasMore && !isLoading" class="flex justify-center mt-10">
         <button @click="loadMore()"
             class="border border-gray-300 px-8 py-2 rounded-full text-sm hover:bg-gray-50 transition">

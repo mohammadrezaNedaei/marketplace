@@ -23,7 +23,6 @@
             </div>
         </div>
 
-        {{-- اطلاعات محصول --}}
         <div class="flex gap-4 mb-8 pb-8 border-b border-gray-100">
             <img src="{{ asset('storage/' . $order->product->picture_url) }}"
                  class="w-20 h-20 object-cover rounded-xl">
@@ -34,7 +33,6 @@
             </div>
         </div>
 
-        {{-- جزئیات پرداخت --}}
         <div class="space-y-3 mb-8">
             <div class="flex justify-between text-sm">
                 <span class="text-gray-500">مبلغ پرداختی</span>
@@ -54,7 +52,6 @@
             </div>
         </div>
 
-        {{-- دسترسی به فایل دیجیتال --}}
         @if($order->product->file_url)
             <div class="bg-gray-50 rounded-xl p-4 mb-6">
                 <p class="text-sm font-medium mb-2">فایل دیجیتال شما آماده است</p>

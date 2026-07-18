@@ -11,7 +11,6 @@
         @csrf
         @method('PUT')
 
-        {{-- عنوان --}}
         <div>
             <label class="block text-sm font-medium mb-1">عنوان محصول</label>
             <input type="text" name="title" value="{{ old('title', $product->title) }}"
@@ -21,7 +20,6 @@
             @enderror
         </div>
 
-        {{-- دسته‌بندی --}}
         <div>
             <label class="block text-sm font-medium mb-1">دسته‌بندی</label>
             <select name="category_id"
@@ -38,7 +36,6 @@
             @enderror
         </div>
 
-        {{-- توضیحات --}}
         <div>
             <label class="block text-sm font-medium mb-1">توضیحات</label>
             <textarea name="description" rows="4"
@@ -48,7 +45,6 @@
             @enderror
         </div>
 
-        {{-- قیمت --}}
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium mb-1">قیمت (تومان)</label>
@@ -68,7 +64,6 @@
             </div>
         </div>
 
-        {{-- عکس فعلی --}}
         <div>
             <label class="block text-sm font-medium mb-1">عکس فعلی</label>
             <img src="{{ asset('storage/' . $product->picture_url) }}"
@@ -81,7 +76,6 @@
             @enderror
         </div>
 
-        {{-- فایل دیجیتال --}}
         <div>
             <label class="block text-sm font-medium mb-1">فایل دیجیتال جدید (اختیاری)</label>
             <input type="file" name="file"
@@ -91,7 +85,6 @@
             @enderror
         </div>
 
-        {{-- وضعیت محصول --}}
         <div>
             <label class="block text-sm font-medium mb-1">وضعیت محصول</label>
             <select name="status"
