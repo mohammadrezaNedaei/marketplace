@@ -18,12 +18,6 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
-    Route::get('/dashboard', function () {
-        return 'داشبورد فروشنده — به زودی';
-    })->name('dashboard');
-});
-
 // مسیرهای ادمین
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
