@@ -18,16 +18,19 @@
 
             @auth
             @php
-            $dashboardRoute = match(auth()->user()->role) {
+            $dashboardRoute = match(Auth::user()->role) {
             'seller' => route('seller.dashboard'),
             'admin' => route('admin.dashboard'),
             default => route('buyer.dashboard'),
             };
             @endphp
-            <a class="text-gray-500" href="{{ $dashboardRoute }}">{{ auth()->user()->username }}</a>
+            @if (Auth::user()->role != 'admin')
+                <a href="{{ route('tickets.index') }}" class="hover:text-black text-gray-500 text-sm">پشتیبانی</a>
+            @endif
+            <a href="{{ $dashboardRoute }}" class="text-gray-500 text-sm">{{ Auth::user()->username }}</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="text-gray-500 hover:text-black">خروج</button>
+                <button type="submit" class="text-gray-500 hover:text-black text-sm">خروج</button>
             </form>
             @else
             <a href="{{ route('login') }}" class="hover:text-black text-gray-500">ورود</a>

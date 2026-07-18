@@ -61,4 +61,29 @@ class ProductController extends Controller
             }
         }
     }
+
+    public function toggleSave(Product $product)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'buyer') {
+            abort(403);
+        }
+
+        $existing = \App\Models\Save::where('user_id', Auth::id())
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
+            $saved = false;
+        } else {
+            \App\Models\Save::create([
+                'user_id'    => Auth::id(),
+                'product_id' => $product->id,
+            ]);
+            $saved = true;
+        }
+
+        return back()->with('saved', $saved);
+    }
+
 }

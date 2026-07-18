@@ -86,6 +86,21 @@
                         </button>
                     </form>
                     @endif
+                    {{-- دکمه ذخیره -- فقط برای خریدار --}}
+                    @if(Auth::user()->role === 'buyer')
+                    @php
+                    $isSaved = \App\Models\Save::where('user_id', Auth::id())
+                    ->where('product_id', $product->id)
+                    ->exists();
+                    @endphp
+                    <form method="POST" action="{{ route('products.save', $product) }}" class="mt-3">
+                        @csrf
+                        <button type="submit"
+                            class="w-full border border-gray-300 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
+                            {{ $isSaved ? '🔖 ذخیره شده' : '🔖 ذخیره محصول' }}
+                        </button>
+                    </form>
+                    @endif
                     @else
                     <p class="text-sm text-gray-400 text-center">
                         فروشندگان نمی‌توانند خرید کنند
