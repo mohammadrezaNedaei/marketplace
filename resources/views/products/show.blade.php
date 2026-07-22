@@ -118,7 +118,7 @@
 
         @auth
         @if(auth()->user()->role === 'buyer')
-        <form method="POST" action="#" class="mb-8">
+        <form method="POST" action="{{ route('reviews.store', $product) }}" class="mb-8">
             @csrf
             <div class="mb-3">
                 <label class="block text-sm font-medium mb-1">امتیاز</label>
@@ -142,7 +142,7 @@
         @endauth
 
         @forelse($product->reviews as $review)
-        <div class="border-b border-gray-100 pb-6 mb-6 last:border-0">
+        <div class="border-b border-gray-100 pb-6 mb-6 p-4 last:border-3 rounded-xl">
             <div class="flex items-center justify-between mb-2">
                 <span class="font-medium text-sm">{{ $review->user->username }}</span>
                 <span class="text-xs text-gray-400">
@@ -158,6 +158,18 @@
                 <p class="text-gray-600 text-sm mt-1">{{ $reply->comment }}</p>
             </div>
             @endforeach
+
+            @auth
+                <form method="POST" action="{{ route('reviews.reply', $review) }}" class="mr-6 mt-4 flex gap-2">
+                    @csrf
+                    <input type="text" name="comment" placeholder="پاسخ ..."
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                    <button type="submit"
+                        class="bg-black text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-800 transition">
+                        ارسال
+                    </button>
+                </form>
+            @endauth
         </div>
         @empty
         <p class="text-gray-400 text-sm text-center py-8">هنوز نظری ثبت نشده</p>
