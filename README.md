@@ -58,14 +58,8 @@ php artisan db:seed
 
 ### Running the app
 
-Two terminals, both running at the same time:
-
 ```bash
-# Terminal 1
-php artisan serve
-
-# Terminal 2
-npm run dev
+composer run dev
 ```
 
 Visit `http://127.0.0.1:8000`.
