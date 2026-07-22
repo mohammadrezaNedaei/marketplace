@@ -1,59 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# مارکت‌پلیس — Instagram + Store
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-stack Laravel marketplace combining Instagram-style product posting with e-commerce functionality. Sellers post products, buyers browse/search/save/purchase, and admins manage users, products, and support tickets.
 
-## About Laravel
+Persian-language app with RTL layout, built with Laravel, Blade, Tailwind CSS, and Alpine.js.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Tool     | Version |
+|----------|---------|
+| PHP      | >= 8.2  |
+| Composer | >= 2.x  |
+| MySQL    | >= 8.0  |
+| Node.js  | >= 18.x |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Setup
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# 1. Clone / navigate to the project
+cd marketplace
 
-## Laravel Sponsors
+# 2. Install PHP dependencies
+composer install
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 3. Install JS dependencies
+npm install
 
-### Premium Partners
+# 4. Copy environment file
+cp .env.example .env
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 5. Generate app key
+php artisan key:generate
 
-## Contributing
+# 6. Configure .env with your database credentials
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=marketplace
+# DB_USERNAME=root
+# DB_PASSWORD=
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 7. Create the database
+mysql -u root -p -e "CREATE DATABASE marketplace;"
 
-## Code of Conduct
+# 8. Run migrations
+php artisan migrate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 9. Link storage (for uploaded product images/files)
+php artisan storage:link
 
-## Security Vulnerabilities
+# 10. Seed the database (creates admin/seller/buyer test accounts + categories)
+php artisan db:seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Running the app
 
-## License
+Two terminals, both running at the same time:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# Terminal 1
+php artisan serve
+
+# Terminal 2
+npm run dev
+```
+
+Visit `http://127.0.0.1:8000`.
+
+### Seeded accounts
+
+`php artisan db:seed` creates these accounts for you:
+
+| Role   | Username      | Password    |
+|--------|---------------|-------------|
+| Admin  | `ادمین تست`   | `admin123`  |
+| Seller | `فروشنده تست` | `seller123` |
+| Buyer  | `خریدار تست`  | `buyer123`  |
+
+
+⚠️ Change or remove these credentials before deploying anywhere public.
+
+---
+
+## User Roles
+
+### Seller (فروشنده)
+- Create/edit/delete products (image, title, description, price, discount price, optional digital file)
+- Toggle product status (active/inactive)
+- View per-product views and sales count
+- Analytics dashboard: total views, sales, this-month orders, per-product chart
+
+### Buyer (خریدار)
+- Explore products with live search, category filter, and sort
+- Save/unsave products
+- Purchase products (fake payment flow — instant "paid" status)
+- Download digital files after purchase
+- Buyer dashboard: purchase history + saved products
+- Leave reviews (rating + comment) with reply support
+
+### Admin (ادمین)
+- Dashboard: user/product/ticket stats + recent activity feed
+- Manage all users: search, filter by role, edit, delete
+- Manage all products: search, filter by status, edit, delete
+- Support ticket system: view all tickets, filter by status, reply, change status
+
+---
+
+## Database Schema
+
+| Table              | Purpose |
+|---------------------|---------|
+| `users`             | username, phone, password, role (buyer/seller/admin) |
+| `categories`        | product categories |
+| `products`          | seller's listings — price, discount, image, file, views, sales |
+| `orders`            | purchases — quantity, amount, status, payment gateway, transaction id |
+| `reviews`           | ratings + comments, supports nested replies via `answer_to_id` |
+| `likes`             | unique per (product, user) |
+| `saves`             | unique per (product, user) |
+| `support_tickets`   | subject + status (open/answered/closed) |
+| `ticket_messages`   | conversation thread per ticket, any admin can reply |
+| `product_views`     | tracks logged-in user views to prevent duplicate view counts |
