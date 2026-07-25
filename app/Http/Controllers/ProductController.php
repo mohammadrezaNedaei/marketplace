@@ -85,4 +85,27 @@ class ProductController extends Controller
         return back()->with('saved', $saved);
     }
 
+    public function toggleLike(Product $product) 
+    {
+        if (!Auth::check() || Auth::user()->role == 'admin') {
+            abort(403);
+        }
+
+        $existing = \App\Models\Like::where('user_id', Auth::id())
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($existing) {
+            $existing->delete();
+            $liked = false;
+        } else {
+            \App\Models\Like::create([
+                'user_id'    => Auth::id(),
+                'product_id' => $product->id,
+            ]);
+            $liked = true;
+        }
+        return back()->with('liked', $liked);
+    }
+
 }

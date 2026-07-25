@@ -70,6 +70,7 @@ Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->grou
 });
 
 Route::post('/products/{product}/save', [App\Http\Controllers\ProductController::class, 'toggleSave'])->name('products.save')->middleware('auth');
+Route::post('/products/{product}/like', [App\Http\Controllers\ProductController::class, 'toggleLike'])->name('products.like')->middleware('auth');
 
 // تیکت‌های پشتیبانی — برای همه کاربران لاگین کرده
 Route::middleware('auth')->group(function () {

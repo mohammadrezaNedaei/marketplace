@@ -28,9 +28,31 @@
                         <span class="font-medium text-gray-700">{{ $product->seller->username }}</span>
                     </p>
 
-                    <p class="text-sm text-gray-400 mb-6">
-                        {{ $product->views }} بازدید · {{ $product->sales_count }} فروش
-                    </p>
+                    <div class="flex items-center gap-4 text-sm text-gray-400 mb-6">
+                        <span>
+                            {{ $product->views }} بازدید · {{ $product->sales_count }} فروش
+                        </span>
+
+                        @auth
+                        @php
+                        $isLiked = \App\Models\Like::where('user_id', Auth::id())
+                        ->where('product_id', $product->id)
+                        ->exists();
+                        @endphp
+
+                        <form method="POST" action="{{ route('products.like', $product) }}" class="inline">
+                            @csrf
+                            <button type="submit" class="flex items-center gap-1 hover:text-red-500 transition {{ $isLiked ? 'text-red-500' : '' }}">
+                                <span>{{ $isLiked ? '❤️' : '🤍' }}</span>
+                                <span>{{ $product->likes->count() }}</span>
+                            </button>
+                        </form>
+                        @else
+                        <span class="flex items-center gap-1">
+                            🤍 {{ $product->likes->count() }}
+                        </span>
+                        @endauth
+                    </div>
 
                     @if($product->description)
                     <p class="text-gray-600 text-sm leading-relaxed mb-6">
@@ -160,15 +182,15 @@
             @endforeach
 
             @auth
-                <form method="POST" action="{{ route('reviews.reply', $review) }}" class="mr-6 mt-4 flex gap-2">
-                    @csrf
-                    <input type="text" name="comment" placeholder="پاسخ ..."
-                        class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black">
-                    <button type="submit"
-                        class="bg-black text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-800 transition">
-                        ارسال
-                    </button>
-                </form>
+            <form method="POST" action="{{ route('reviews.reply', $review) }}" class="mr-6 mt-4 flex gap-2">
+                @csrf
+                <input type="text" name="comment" placeholder="پاسخ ..."
+                    class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                <button type="submit"
+                    class="bg-black text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-800 transition">
+                    ارسال
+                </button>
+            </form>
             @endauth
         </div>
         @empty
