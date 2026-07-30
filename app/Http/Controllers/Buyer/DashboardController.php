@@ -15,13 +15,19 @@ class DashboardController extends Controller
         return view('buyer.dashboard');
     }
 
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = Order::where('user_id', Auth::id())
-                       ->where('status', 'paid')
-                       ->with('product.category')
-                       ->latest('created_at')
-                       ->paginate(3);
+        $query = Order::where('user_id', Auth::id())
+            ->where('status', 'paid')
+            ->with('product.category');
+
+        if ($request->filled('search')) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $orders = $query->latest('created_at')->paginate(6);
 
         return response()->json([
             'data' => $orders->map(fn($o) => [
@@ -31,8 +37,8 @@ class DashboardController extends Controller
                 'amount'       => number_format($o->amount),
                 'picture_url'  => asset('storage/' . $o->product->picture_url),
                 'file_url'     => $o->product->file_url
-                                    ? asset('storage/' . $o->product->file_url)
-                                    : null,
+                    ? asset('storage/' . $o->product->file_url)
+                    : null,
                 'order_url'    => route('orders.show', $o->id),
             ]),
             'current_page' => $orders->currentPage(),
@@ -40,12 +46,18 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function saves()
+    public function saves(Request $request)
     {
-        $saves = Save::where('user_id', Auth::id())
-                     ->with('product.category', 'product.seller')
-                     ->latest('created_at')
-                     ->paginate(4);
+        $query = Save::where('user_id', Auth::id())
+            ->with('product.category', 'product.seller');
+
+        if ($request->filled('search')) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $saves = $query->latest('created_at')->paginate(6);
 
         return response()->json([
             'data' => $saves->map(fn($s) => [
@@ -70,10 +82,10 @@ class DashboardController extends Controller
     public function paymentsApi(Request $request)
     {
         $query = Order::whereUserId(Auth::id())
-                      ->with('product.category')
-                      ->latest('created_at');
+            ->with('product.category')
+            ->latest('created_at');
 
-        if($request->filled('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
             $query->where('status', 'paid');
@@ -82,20 +94,30 @@ class DashboardController extends Controller
         $orders = $query->paginate(10);
 
         return response()->json([
-        'data' => $orders->map(fn($o) => [
-            'id'          => $o->id,
-            'title'       => $o->product->title,
-            'category'    => $o->product->category->name,
-            'amount'      => number_format($o->amount),
-            'status'      => $o->status,
-            'gateway'     => $o->payment_gateway,
-            'transaction' => $o->transaction_id,
-            'date'        => $o->created_at,
-            'picture_url' => asset('storage/' . $o->product->picture_url),
-            'order_url'   => route('orders.show', $o->id),
-        ]),
-        'current_page' => $orders->currentPage(),
-        'last_page'    => $orders->lastPage(),
-    ]);
+            'data' => $orders->map(fn($o) => [
+                'id'          => $o->id,
+                'title'       => $o->product->title,
+                'category'    => $o->product->category->name,
+                'amount'      => number_format($o->amount),
+                'status'      => $o->status,
+                'gateway'     => $o->payment_gateway,
+                'transaction' => $o->transaction_id,
+                'date'        => $o->created_at,
+                'picture_url' => asset('storage/' . $o->product->picture_url),
+                'order_url'   => route('orders.show', $o->id),
+            ]),
+            'current_page' => $orders->currentPage(),
+            'last_page'    => $orders->lastPage(),
+        ]);
+    }
+
+    public function purchasesPage()
+    {
+        return view('buyer.purchases');
+    }
+
+    public function savesPage()
+    {
+        return view('buyer.saves');
     }
 }

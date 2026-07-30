@@ -60,6 +60,8 @@ Route::get('/products/{product}', [App\Http\Controllers\ProductController::class
 Route::middleware('auth')->group(function () {
     Route::post('/orders/{product}', [App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
@@ -68,6 +70,8 @@ Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->grou
     Route::get('/api/saves', [App\Http\Controllers\Buyer\DashboardController::class, 'saves'])->name('api.saves');
     Route::get('/payments', [App\Http\Controllers\Buyer\DashboardController::class, 'payments'])->name('payments');
     Route::get('/api/payments', [App\Http\Controllers\Buyer\DashboardController::class, 'paymentsApi'])->name('api.payments');
+    Route::get('/purchases', [App\Http\Controllers\Buyer\DashboardController::class, 'purchasesPage'])->name('purchases');
+    Route::get('/saves', [App\Http\Controllers\Buyer\DashboardController::class, 'savesPage'])->name('saves');
 });
 
 Route::post('/products/{product}/save', [App\Http\Controllers\ProductController::class, 'toggleSave'])->name('products.save')->middleware('auth');
