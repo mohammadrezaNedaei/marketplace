@@ -92,10 +92,11 @@
 
 <script>
     function explore() {
+        const urlParams = new URLSearchParams(window.location.search);
         return {
-            search: '',
-            selectedCategory: '',
-            sort: 'newest',
+            search: urlParams.get('search') || '',
+            selectedCategory: urlParams.get('category') || '',
+            sort: urlParams.get('sort') || 'newest',
             products: [],
             isLoading: false,
             currentPage: 1,

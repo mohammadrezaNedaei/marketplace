@@ -12,3 +12,76 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+
+@theme {
+    --color-paper: #F6F4EF;
+    --color-ink: #2B2A28;
+    --color-sage: #4A6B5C;
+    --color-sage-light: #6B8B7A;
+    --color-sand: #D8CDBB;
+    --color-bronze: #8A7D68;
+}
+
+* {
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+body {
+    background-color: var(--color-paper);
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.45;
+}
+
+.blob-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--color-sage-light);
+    top: -150px;
+    right: -100px;
+    animation: drift-1 18s ease-in-out infinite;
+}
+
+.blob-2 {
+    width: 400px;
+    height: 400px;
+    background: var(--color-sand);
+    bottom: -150px;
+    left: -50px;
+    animation: drift-2 22s ease-in-out infinite;
+}
+
+@keyframes drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-40px, 30px) scale(1.1); }
+}
+
+@keyframes drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(30px, -40px) scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blob-1, .blob-2 {
+        animation: none;
+    }
+}
+
+.category-card {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-sand);
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 80%, rgba(74,107,92,0.15) 0%, transparent 50%);
+}
