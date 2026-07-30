@@ -66,6 +66,8 @@ Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->grou
     Route::get('/dashboard', [App\Http\Controllers\Buyer\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api/orders', [App\Http\Controllers\Buyer\DashboardController::class, 'orders'])->name('api.orders');
     Route::get('/api/saves', [App\Http\Controllers\Buyer\DashboardController::class, 'saves'])->name('api.saves');
+    Route::get('/payments', [App\Http\Controllers\Buyer\DashboardController::class, 'payments'])->name('payments');
+    Route::get('/api/payments', [App\Http\Controllers\Buyer\DashboardController::class, 'paymentsApi'])->name('api.payments');
 });
 
 Route::post('/products/{product}/save', [App\Http\Controllers\ProductController::class, 'toggleSave'])->name('products.save')->middleware('auth');

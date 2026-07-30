@@ -4,8 +4,13 @@
 
 @section('content')
 
-<h1 class="text-2xl font-bold mb-8">داشبورد من</h1>
-
+<div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold">داشبورد من</h1>
+    <a href="{{ route('buyer.payments') }}"
+        class="border border-gray-300 px-5 py-2 rounded-full text-sm hover:bg-gray-50 transition">
+        تاریخچه پرداخت‌ها
+    </a>
+</div>
 <div class="mb-10" x-data="section('/buyer/api/orders')">
     <h2 class="text-lg font-bold mb-4">خریدهای من
         <span class="text-gray-400 text-sm font-normal" x-show="total > 0" x-text="'(' + total + ')'"></span>

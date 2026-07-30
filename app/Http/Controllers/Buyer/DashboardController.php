@@ -5,17 +5,16 @@ namespace App\Http\Controllers\Buyer;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Save;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    // صفحه اصلی داشبورد
     public function index()
     {
         return view('buyer.dashboard');
     }
 
-    // API سفارشات
     public function orders()
     {
         $orders = Order::where('user_id', Auth::id())
@@ -41,7 +40,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    // API ذخیره‌ها
     public function saves()
     {
         $saves = Save::where('user_id', Auth::id())
@@ -62,5 +60,42 @@ class DashboardController extends Controller
             'current_page' => $saves->currentPage(),
             'last_page'    => $saves->lastPage(),
         ]);
+    }
+
+    public function payments()
+    {
+        return view('buyer.payments');
+    }
+
+    public function paymentsApi(Request $request)
+    {
+        $query = Order::whereUserId(Auth::id())
+                      ->with('product.category')
+                      ->latest('created_at');
+
+        if($request->filled('status')) {
+            $query->where('status', $request->status);
+        } else {
+            $query->where('status', 'paid');
+        }
+
+        $orders = $query->paginate(10);
+
+        return response()->json([
+        'data' => $orders->map(fn($o) => [
+            'id'          => $o->id,
+            'title'       => $o->product->title,
+            'category'    => $o->product->category->name,
+            'amount'      => number_format($o->amount),
+            'status'      => $o->status,
+            'gateway'     => $o->payment_gateway,
+            'transaction' => $o->transaction_id,
+            'date'        => $o->created_at,
+            'picture_url' => asset('storage/' . $o->product->picture_url),
+            'order_url'   => route('orders.show', $o->id),
+        ]),
+        'current_page' => $orders->currentPage(),
+        'last_page'    => $orders->lastPage(),
+    ]);
     }
 }
