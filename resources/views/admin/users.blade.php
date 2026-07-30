@@ -76,7 +76,7 @@
                             {{ $roleLabel }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-gray-400">{{ $user->created_at }}</td>
+                    <td class="px-6 py-4 text-gray-400">{{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($user->created_at)) }}</td>
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
                             <a href="{{ route('admin.users.edit', $user) }}"

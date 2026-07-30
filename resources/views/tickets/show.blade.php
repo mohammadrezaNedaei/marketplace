@@ -9,7 +9,7 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-xl font-bold">{{ $ticket->subject }}</h1>
-            <p class="text-gray-400 text-xs mt-1">{{ $ticket->created_at }}</p>
+            <p class="text-gray-400 text-xs mt-1">{{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($ticket->created_at)) }}</p>
         </div>
         <a href="{{ route('tickets.index') }}"
             class="border border-gray-300 px-5 py-2 rounded-full text-sm hover:bg-gray-50 transition">
@@ -40,7 +40,7 @@
                     </p>
                     <p class="text-sm">{{ $message->message }}</p>
                     <p class="text-xs mt-2 {{ $isAdmin ? 'text-gray-400' : 'text-gray-400' }}">
-                        {{ $message->created_at }}
+                        {{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($message->created_at)) }}
                     </p>
                 </div>
             </div>

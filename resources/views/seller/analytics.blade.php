@@ -50,7 +50,7 @@
                              class="w-10 h-10 rounded-lg object-cover">
                         <div>
                             <p class="font-medium text-sm">{{ $order->product->title }}</p>
-                            <p class="text-gray-400 text-xs">{{ $order->created_at }}</p>
+                            <p class="text-gray-400 text-xs">{{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($order->created_at)) }}</p>
                         </div>
                     </div>
                     <span class="font-bold text-sm">{{ number_format($order->amount) }} تومان</span>
@@ -86,7 +86,7 @@
                                     {{ $order->status }}
                                 </span>
                             </td>
-                            <td class="py-3 text-gray-400">{{ $order->created_at }}</td>
+                            <td class="py-3 text-gray-400">{{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($order->created_at)) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

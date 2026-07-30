@@ -40,7 +40,7 @@
             class="flex items-center justify-between px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition">
             <div>
                 <p class="font-medium text-sm">{{ $ticket->subject ?? 'بدون موضوع' }}</p>
-                <p class="text-gray-400 text-xs mt-0.5">{{ $ticket->user->username }} · {{ $ticket->created_at }}</p>
+                <p class="text-gray-400 text-xs mt-0.5">{{ $ticket->user->username }} · {{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($ticket->created_at)) }}</p>
             </div>
             @php
                 $statusClass = match($ticket->status) {

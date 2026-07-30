@@ -25,7 +25,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium">{{ $ticket->user->username }}</p>
-                <p class="text-gray-400 text-xs">{{ $ticket->created_at }}</p>
+                <p class="text-gray-400 text-xs">{{ \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($ticket->created_at)) }}</p>
             </div>
             {{-- تغییر وضعیت --}}
             <form method="POST" action="{{ route('admin.tickets.status', $ticket) }}" class="flex gap-2 items-center">
@@ -58,7 +58,7 @@
                     </p>
                     <p class="text-sm">{{ $message->message }}</p>
                     <p class="text-xs mt-1 {{ $isAdmin ? 'text-gray-400' : 'text-gray-400' }}">
-                        {{ $message->created_at }}
+                        {{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($message->created_at)) }}
                     </p>
                 </div>
             </div>
