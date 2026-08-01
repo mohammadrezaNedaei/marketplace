@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 
-// صفحه اصلی
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
@@ -17,30 +16,29 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// مسیرهای ادمین
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
 
-    // کاربران
     Route::get('/users', [App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
     Route::get('/users/{user}/edit', [App\Http\Controllers\Admin\AdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [App\Http\Controllers\Admin\AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [App\Http\Controllers\Admin\AdminController::class, 'deleteUser'])->name('users.delete');
 
-    // تیکت‌ها
     Route::get('/tickets', [App\Http\Controllers\Admin\AdminController::class, 'tickets'])->name('tickets');
     Route::get('/tickets/{ticket}', [App\Http\Controllers\Admin\AdminController::class, 'showTicket'])->name('tickets.show');
     Route::post('/tickets/{ticket}/reply', [App\Http\Controllers\Admin\AdminController::class, 'replyTicket'])->name('tickets.reply');
     Route::put('/tickets/{ticket}/status', [App\Http\Controllers\Admin\AdminController::class, 'updateTicketStatus'])->name('tickets.status');
 
-    // محصولات
     Route::get('/products', [App\Http\Controllers\Admin\AdminController::class, 'products'])->name('products');
     Route::get('/products/{product}/edit', [App\Http\Controllers\Admin\AdminController::class, 'editProduct'])->name('products.edit');
     Route::put('/products/{product}', [App\Http\Controllers\Admin\AdminController::class, 'updateProduct'])->name('products.update');
     Route::delete('/products/{product}', [App\Http\Controllers\Admin\AdminController::class, 'deleteProduct'])->name('products.delete');
+
+    Route::get('/withdrawals', [App\Http\Controllers\Admin\AdminController::class, 'withdrawals'])->name('withdrawals');
+    Route::put('/withdrawals/{withdrawal}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveWithdrawal'])->name('withdrawals.approve');
+    Route::put('/withdrawals/{withdrawal}/reject', [App\Http\Controllers\Admin\AdminController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
 });
 
-// مسیرهای فروشنده
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Seller\ProductController::class, 'index'])->name('dashboard');
 
@@ -77,7 +75,6 @@ Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->grou
 Route::post('/products/{product}/save', [App\Http\Controllers\ProductController::class, 'toggleSave'])->name('products.save')->middleware('auth');
 Route::post('/products/{product}/like', [App\Http\Controllers\ProductController::class, 'toggleLike'])->name('products.like')->middleware('auth');
 
-// تیکت‌های پشتیبانی — برای همه کاربران لاگین کرده
 Route::middleware('auth')->group(function () {
     Route::get('/tickets', [App\Http\Controllers\TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/create', [App\Http\Controllers\TicketController::class, 'create'])->name('tickets.create');
@@ -86,8 +83,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/{ticket}/reply', [App\Http\Controllers\TicketController::class, 'reply'])->name('tickets.reply');
 });
 
-// نظرات — فقط برای کاربران لاگین کرده
 Route::middleware('auth')->group(function () {
     Route::post('/products/{product}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{review}/reply', [App\Http\Controllers\ReviewController::class, 'reply'])->name('reviews.reply');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/wallet', [App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('wallet.deposit.form');
+    Route::post('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'deposit'])->name('wallet.deposit');
+    Route::get('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdrawForm'])->name('wallet.withdraw.form');
+    Route::post('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdraw'])->name('wallet.withdraw');
 });

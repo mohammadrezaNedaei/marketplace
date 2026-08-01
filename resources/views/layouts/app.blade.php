@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'مارکت‌پلیس')</title>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+    <script type="text/javascript" src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
     @if(session('error'))
     <script>
         alert(@json(session('error')));
@@ -38,7 +40,15 @@
             @if (Auth::user()->role != 'admin')
                 <a href="{{ route('tickets.index') }}" class="hover:text-black text-gray-500 text-sm">پشتیبانی</a>
             @endif
-            <a href="{{ $dashboardRoute }}" class="text-gray-500 text-sm">{{ Auth::user()->username }}</a>
+            <a href="{{ $dashboardRoute }}" class="text-gray-500 text-sm hover:text-black">{{ Auth::user()->username }}</a>
+            @if (!(Route::currentRouteName() === 'wallet.index'))
+
+            <a href="{{ route('wallet.index') }}" class="hover:text-black text-gray-500 text-sm">کیف پول
+                <p>{{ number_format(Auth::user()->wallet_balance) }}
+                    تومان
+                </p>
+            </a>
+            @endif
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="text-gray-500 hover:text-black text-sm">خروج</button>

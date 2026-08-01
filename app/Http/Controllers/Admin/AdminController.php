@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    // داشبورد ادمین
     public function index()
     {
         $totalUsers    = User::count();
@@ -20,7 +19,7 @@ class AdminController extends Controller
         $totalBuyers   = User::where('role', 'buyer')->count();
         $openTickets   = SupportTicket::where('status', 'open')->count();
         $totalProducts = \App\Models\Product::where('status', 'active')->count();
-        // آخرین فعالیت‌های پلتفرم
+
         $recentActivities = collect()
             ->merge(
                 User::latest('created_at')->take(5)->get()->map(fn($u) => [
@@ -68,7 +67,6 @@ class AdminController extends Controller
         ));
     }
 
-    // لیست کاربران
     public function users(Request $request)
     {
         $query = User::query();
@@ -86,13 +84,11 @@ class AdminController extends Controller
         return view('admin.users', compact('users'));
     }
 
-    // ویرایش کاربر
     public function editUser(User $user)
     {
         return view('admin.edit-user', compact('user'));
     }
 
-    // ذخیره تغییرات کاربر
     public function updateUser(Request $request, User $user)
     {
         $request->validate([
@@ -116,7 +112,6 @@ class AdminController extends Controller
             ->with('success', 'اطلاعات کاربر با موفقیت ویرایش شد');
     }
 
-    // حذف کاربر
     public function deleteUser(User $user)
     {
         // ادمین نمی‌تواند خودش را حذف کند
@@ -130,7 +125,6 @@ class AdminController extends Controller
             ->with('success', 'کاربر با موفقیت حذف شد');
     }
 
-    // لیست تیکت‌ها
     public function tickets(Request $request)
     {
         $query = SupportTicket::with('user')->latest('created_at');
@@ -144,14 +138,12 @@ class AdminController extends Controller
         return view('admin.tickets', compact('tickets'));
     }
 
-    // نمایش تیکت و پیام‌ها
     public function showTicket(SupportTicket $ticket)
     {
         $ticket->load(['user', 'messages.sender']);
         return view('admin.show-ticket', compact('ticket'));
     }
 
-    // پاسخ به تیکت
     public function replyTicket(Request $request, SupportTicket $ticket)
     {
         $request->validate([
@@ -164,14 +156,12 @@ class AdminController extends Controller
             'message'   => $request->message,
         ]);
 
-        // وضعیت تیکت را به answered تغییر بده
         $ticket->status = 'answered';
         $ticket->save();
 
         return back()->with('success', 'پاسخ با موفقیت ارسال شد');
     }
 
-    // تغییر وضعیت تیکت
     public function updateTicketStatus(Request $request, SupportTicket $ticket)
     {
         $request->validate([
@@ -184,7 +174,6 @@ class AdminController extends Controller
         return back()->with('success', 'وضعیت تیکت بروزرسانی شد');
     }
 
-    // لیست همه محصولات
     public function products(Request $request)
     {
         $query = \App\Models\Product::with(['seller', 'category']);
@@ -202,14 +191,12 @@ class AdminController extends Controller
         return view('admin.products', compact('products'));
     }
 
-    // ویرایش محصول توسط ادمین
     public function editProduct(\App\Models\Product $product)
     {
         $categories = \App\Models\Category::all();
         return view('admin.edit-product', compact('product', 'categories'));
     }
 
-    // ذخیره تغییرات محصول توسط ادمین
     public function updateProduct(Request $request, \App\Models\Product $product)
     {
         $request->validate([
@@ -233,11 +220,103 @@ class AdminController extends Controller
             ->with('success', 'محصول با موفقیت ویرایش شد');
     }
 
-    // حذف محصول توسط ادمین
     public function deleteProduct(\App\Models\Product $product)
     {
         $product->delete();
         return redirect()->route('admin.products')
             ->with('success', 'محصول با موفقیت حذف شد');
+    }
+
+    public function withdrawals(Request $request)
+    {
+        $query = \App\Models\WithdrawalRequest::with('user')->latest('created_at');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $fromDate = $this->jalaliToGregorian($request->from_date);
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', $fromDate);
+            }
+        }
+
+        if ($request->filled('to_date')) {
+            $toDate = $this->jalaliToGregorian($request->to_date);
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', $toDate);
+            }
+        }
+
+        $withdrawals = $query->paginate(20)->withQueryString();
+
+        return view('admin.withdrawals', compact('withdrawals'));
+    }
+
+    private function jalaliToGregorian(string $jalaliDate): ?string
+    {
+        try {
+            $normalized = strtr($jalaliDate, [
+                '۰' => '0',
+                '۱' => '1',
+                '۲' => '2',
+                '۳' => '3',
+                '۴' => '4',
+                '۵' => '5',
+                '۶' => '6',
+                '۷' => '7',
+                '۸' => '8',
+                '۹' => '9',
+            ]);
+
+            return \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $normalized)
+                ->toCarbon()
+                ->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function approveWithdrawal(\App\Models\WithdrawalRequest $withdrawal)
+    {
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'این درخواست قبلاً بررسی شده است');
+        }
+
+        $seller = $withdrawal->user;
+
+        if ($seller->wallet_balance < $withdrawal->amount) {
+            return back()->with('error', 'موجودی فروشنده کافی نیست');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($withdrawal, $seller) {
+            $seller->decrement('wallet_balance', $withdrawal->amount);
+
+            \App\Models\WalletTransaction::create([
+                'user_id' => $seller->id,
+                'type'    => 'withdrawal',
+                'amount'  => $withdrawal->amount,
+            ]);
+
+            $withdrawal->status      = 'approved';
+            $withdrawal->reviewed_at = now();
+            $withdrawal->save();
+        });
+
+        return back()->with('success', 'درخواست برداشت تایید شد');
+    }
+
+    public function rejectWithdrawal(\App\Models\WithdrawalRequest $withdrawal)
+    {
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'این درخواست قبلاً بررسی شده است');
+        }
+
+        $withdrawal->status      = 'rejected';
+        $withdrawal->reviewed_at = now();
+        $withdrawal->save();
+
+        return back()->with('success', 'درخواست برداشت رد شد');
     }
 }

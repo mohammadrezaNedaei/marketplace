@@ -237,6 +237,8 @@ namespace App\Models{
  * @property string $phone
  * @property string $password
  * @property string $role
+ * @property string $status
+ * @property numeric $wallet_balance
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Order> $orders
@@ -245,6 +247,8 @@ namespace App\Models{
  * @property-read int|null $products_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SupportTicket> $tickets
  * @property-read int|null $tickets_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WalletTransaction> $walletTransactions
+ * @property-read int|null $wallet_transactions_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
@@ -253,9 +257,22 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRole($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUsername($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereWalletBalance($value)
  */
 	class User extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property-read \App\Models\Order|null $order
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|WalletTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|WalletTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|WalletTransaction query()
+ */
+	class WalletTransaction extends \Eloquent {}
 }
 

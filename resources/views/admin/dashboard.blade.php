@@ -76,6 +76,11 @@
             <h2 class="font-bold mb-1">مدیریت محصولات</h2>
             <p class="text-gray-400 text-sm">مشاهده، ویرایش و حذف محصولات</p>
         </a>
+        <a href="{{ route('admin.withdrawals') }}"
+            class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
+            <h2 class="font-bold mb-1">درخواست‌های برداشت</h2>
+            <p class="text-gray-400 text-sm">تایید یا رد درخواست‌های برداشت فروشندگان</p>
+        </a>
     </div>
 
 @endsection

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -30,19 +32,45 @@ class OrderController extends Controller
         }
 
         $price = $product->discount_price ?? $product->price;
+        $buyer = Auth::user();
 
-        // ایجاد سفارش
+        if ($buyer->wallet_balance < $price) {
+        return redirect()->route('products.show', $product)
+                         ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
+        }
+
+        DB::transaction(function () use ($buyer, $product, $price, &$order) {
+        $buyer->decrement('wallet_balance', $price);
+
         $order = Order::create([
-            'user_id' => Auth::id(),
-            'product_id'=> $product->id,
-            'quantity' => 1,
-            'amount' => $price,
-            'status' => 'paid',
-            'payment_gateway' => 'fake',
-            'transaction_id' => 'FAKE-' . strtoupper(uniqid()),
+            'user_id'         => $buyer->id,
+            'product_id'      => $product->id,
+            'quantity'        => 1,
+            'amount'          => $price,
+            'status'          => 'paid',
+            'payment_gateway' => 'wallet',
+            'transaction_id'  => 'ORD-' . strtoupper(uniqid()),
+        ]);
+
+        WalletTransaction::create([
+            'user_id'  => $buyer->id,
+            'type'     => 'purchase',
+            'amount'   => $price,
+            'order_id' => $order->id,
+        ]);
+
+        $seller = $product->seller;
+        $seller->increment('wallet_balance', $price);
+
+        WalletTransaction::create([
+            'user_id'  => $seller->id,
+            'type'     => 'income',
+            'amount'   => $price,
+            'order_id' => $order->id,
         ]);
 
         $product->increment('sales_count');
+    });
 
         return redirect()->route('orders.show', $order)
             ->with('success', 'خرید با موفقیت انجام شد');
