@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'مارکت‌پلیس')</title>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    @if(session('error'))
+    <script>
+        alert(@json(session('error')));
+    </script>
+    @endif
+
+    @if(session('success'))
+    <script>
+        alert(@json(session('success')));
+    </script>
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

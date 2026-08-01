@@ -11,6 +11,8 @@ class User extends Authenticatable
         'phone',
         'password',
         'role',
+        'status',
+        'wallet_balance'
     ];
 
     protected $hidden = [
@@ -30,5 +32,9 @@ class User extends Authenticatable
     public function tickets()
     {
         return $this->hasMany(SupportTicket::class);
+    }
+
+    public function walletTransactions() {
+        return $this->hasMany(WalletTransaction::class);
     }
 }
