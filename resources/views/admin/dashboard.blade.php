@@ -13,11 +13,21 @@
 
     </div>
 
-
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <p class="text-gray-400 text-xs mb-1">کل فروش</p>
+            <p class="text-xl font-bold">{{ number_format($totalsales) }}</p>
+        </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <p class="text-gray-400 text-xs mb-1">کل کاربران</p>
             <p class="text-2xl font-bold">{{ number_format($totalUsers) }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <p onclick="window.location.href='{{ route('admin.categories') }}'" class="text-gray-400 text-xs mb-1">کل دسته بندی ها</p>
+            <p class="text-xl font-bold">{{ number_format($totalCategories) }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <p class="text-gray-400 text-xs mb-1">فروشندگان</p>

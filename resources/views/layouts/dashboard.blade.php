@@ -77,6 +77,11 @@
                             محصولات
                         </a>
 
+                        <a href="{{ route('admin.categories') }}"
+                           class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
+                            دسته بندی‌ ها
+                        </a>
+
                         <a href="{{ route('admin.orders') }}"
                            class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
                             سفارشات

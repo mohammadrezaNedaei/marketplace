@@ -40,6 +40,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/withdrawals', [App\Http\Controllers\Admin\AdminController::class, 'withdrawals'])->name('withdrawals');
     Route::put('/withdrawals/{withdrawal}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveWithdrawal'])->name('withdrawals.approve');
     Route::put('/withdrawals/{withdrawal}/reject', [App\Http\Controllers\Admin\AdminController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
+
+    Route::get('/categories', [App\Http\Controllers\Admin\CategoryController::class, 'index'])->name('categories');
+
+    Route::get('/categories/create', [App\Http\Controllers\Admin\CategoryController::class, 'create'])->name('categories.create');
+
+    Route::post('/categories', [App\Http\Controllers\Admin\CategoryController::class, 'store'])->name('categories.store');
+
+    Route::get('/categories/{category}/edit', [App\Http\Controllers\Admin\CategoryController::class, 'edit'])->name('categories.edit');
+
+    Route::put('/categories/{category}', [App\Http\Controllers\Admin\CategoryController::class, 'update'])->name('categories.update');
+
+    Route::delete('/categories/{category}', [App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {

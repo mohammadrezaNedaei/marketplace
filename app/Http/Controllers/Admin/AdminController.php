@@ -20,6 +20,8 @@ class AdminController extends Controller
         $totalBuyers   = User::where('role', 'buyer')->count();
         $openTickets   = SupportTicket::where('status', 'open')->count();
         $totalProducts = \App\Models\Product::where('status', 'active')->count();
+        $totalsales    = \App\Models\Order::whereStatus('paid')->sum('amount');
+        $totalCategories = \App\Models\Category::count();
 
         $recentActivities = collect()
             ->merge(
@@ -65,6 +67,8 @@ class AdminController extends Controller
             'openTickets',
             'totalProducts',
             'recentActivities',
+            'totalsales',
+            'totalCategories'
         ));
     }
 
