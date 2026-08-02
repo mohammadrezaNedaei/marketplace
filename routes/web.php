@@ -34,6 +34,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/products/{product}', [App\Http\Controllers\Admin\AdminController::class, 'updateProduct'])->name('products.update');
     Route::delete('/products/{product}', [App\Http\Controllers\Admin\AdminController::class, 'deleteProduct'])->name('products.delete');
 
+    Route::get('/orders', [App\Http\Controllers\Admin\AdminController::class, 'orders'])->name('orders');
+    Route::put('/orders/{order}/status', [App\Http\Controllers\Admin\AdminController::class, 'updateOrderStatus'])->name('orders.status');
+
     Route::get('/withdrawals', [App\Http\Controllers\Admin\AdminController::class, 'withdrawals'])->name('withdrawals');
     Route::put('/withdrawals/{withdrawal}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveWithdrawal'])->name('withdrawals.approve');
     Route::put('/withdrawals/{withdrawal}/reject', [App\Http\Controllers\Admin\AdminController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
@@ -58,6 +61,7 @@ Route::get('/products/{product}', [App\Http\Controllers\ProductController::class
 Route::middleware('auth')->group(function () {
     Route::post('/orders/{product}', [App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/pay', [App\Http\Controllers\OrderController::class, 'pay'])->name('orders.pay')->middleware('auth');
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });

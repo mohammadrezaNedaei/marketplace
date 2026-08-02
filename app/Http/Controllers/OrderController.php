@@ -86,4 +86,52 @@ class OrderController extends Controller
 
         return view('orders.show', compact('order'));
     }
+
+    public function pay(Order $order) {
+
+        if($order->user_id !== Auth::id()){
+            abort(403);
+        }
+
+        if ($order->status !== 'pending') {
+        return redirect()->route('buyer.payments')->with('error', 'این سفارش قبلاً پردازش شده است');
+        }
+
+        $buyer = Auth::user();
+
+        if ($buyer->wallet_balance < $order->amount) {
+        return redirect()->route('buyer.payments')
+                         ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
+        }
+
+        DB::transaction(function () use ($buyer, $order) {
+
+            $buyer->decrement('wallet_balance', $order->amount);
+
+            $order->status = 'paid';
+            $order->save();
+
+            WalletTransaction::create([
+                'user_id'  => $buyer->id,
+                'type' => 'purchase',
+                'amount' => $order->amount,
+                'order_id' => $order->id,
+            ]);
+
+            $seller = $order->product->seller;
+            $seller->increment('wallet_balance', $order->amount);
+
+            WalletTransaction::create([
+                'user_id'  => $seller->id,
+                'type' => 'income',
+                'amount' => $order->amount,
+                'order_id' => $order->id,
+            ]);
+
+            $order->product->increment('sales_count');
+        });
+
+        return redirect()->route('orders.show', $order)->with('success', 'پرداخت با موفقیت انجام شد');
+
+    }
 }

@@ -81,6 +81,11 @@
             <h2 class="font-bold mb-1">درخواست‌های برداشت</h2>
             <p class="text-gray-400 text-sm">تایید یا رد درخواست‌های برداشت فروشندگان</p>
         </a>
+        <a href="{{ route('admin.orders') }}"
+            class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
+            <h2 class="font-bold mb-1">سفارشات</h2>
+            <p class="text-gray-400 text-sm">مشاهده و ویرایش سفارشات</p>
+        </a>
     </div>
 
 @endsection

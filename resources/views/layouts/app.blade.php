@@ -41,7 +41,7 @@
                 <a href="{{ route('tickets.index') }}" class="hover:text-black text-gray-500 text-sm">پشتیبانی</a>
             @endif
             <a href="{{ $dashboardRoute }}" class="text-gray-500 text-sm hover:text-black">{{ Auth::user()->username }}</a>
-            @if (!(Route::currentRouteName() === 'wallet.index'))
+            @if (!(Route::currentRouteName() === 'wallet.index') && Auth::user()->role != 'admin')
 
             <a href="{{ route('wallet.index') }}" class="hover:text-black text-gray-500 text-sm">کیف پول
                 <p>{{ number_format(Auth::user()->wallet_balance) }}

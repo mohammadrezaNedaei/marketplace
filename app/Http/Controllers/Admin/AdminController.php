@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\SupportTicket;
 use App\Models\TicketMessage;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -318,5 +319,47 @@ class AdminController extends Controller
         $withdrawal->save();
 
         return back()->with('success', 'درخواست برداشت رد شد');
+    }
+
+    public function orders(Request $request)
+    {
+        $query = Order::with(['user', 'product']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $fromDate = $this->jalaliToGregorian($request->from_date);
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', $fromDate);
+            }
+        }
+
+        if ($request->filled('to_date')) {
+            $toDate = $this->jalaliToGregorian($request->to_date);
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', $toDate);
+            }
+        }
+
+        $orders = $query->latest('created_at')->paginate(10)->withQueryString();
+
+        return view('admin.orders', compact('orders'));
+    }
+
+    public function updateOrderStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,processing,completed,canceled',
+        ], [
+            'status.required' => 'وضعیت سفارش الزامی است',
+            'status.in'       => 'وضعیت سفارش نامعتبر است',
+        ]);
+
+        $order->status = $request->status;
+        $order->save();
+
+        return back()->with('success', 'وضعیت سفارش بروزرسانی شد');
     }
 }

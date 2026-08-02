@@ -81,17 +81,32 @@ class DashboardController extends Controller
 
     public function paymentsApi(Request $request)
     {
-        $query = Order::whereUserId(Auth::id())
-            ->with('product.category')
-            ->latest('created_at');
+        $query = Order::where('user_id', Auth::id())
+            ->with('product.category');
+
+        if ($request->filled('search')) {
+            $query->whereHas('product', fn($q) => $q->where('title', 'like', '%' . $request->search . '%'));
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        } else {
-            $query->where('status', 'paid');
         }
 
-        $orders = $query->paginate(10);
+        if ($request->filled('from_date')) {
+            $fromDate = $this->jalaliToGregorian($request->from_date);
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', $fromDate);
+            }
+        }
+
+        if ($request->filled('to_date')) {
+            $toDate = $this->jalaliToGregorian($request->to_date);
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', $toDate);
+            }
+        }
+
+        $orders = $query->latest('created_at')->paginate(10);
 
         return response()->json([
             'data' => $orders->map(fn($o) => [
@@ -102,9 +117,10 @@ class DashboardController extends Controller
                 'status'      => $o->status,
                 'gateway'     => $o->payment_gateway,
                 'transaction' => $o->transaction_id,
-                'date'        => $o->created_at,
+                'date'        => \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($o->created_at))->format('Y/m/d H:i'),
                 'picture_url' => asset('storage/' . $o->product->picture_url),
                 'order_url'   => route('orders.show', $o->id),
+                'pay_url'     => $o->status === 'pending' ? route('orders.pay', $o->id) : null,
             ]),
             'current_page' => $orders->currentPage(),
             'last_page'    => $orders->lastPage(),
@@ -119,5 +135,29 @@ class DashboardController extends Controller
     public function savesPage()
     {
         return view('buyer.saves');
+    }
+
+     private function jalaliToGregorian(string $jalaliDate): ?string
+    {
+        try {
+            $normalized = strtr($jalaliDate, [
+                '۰' => '0',
+                '۱' => '1',
+                '۲' => '2',
+                '۳' => '3',
+                '۴' => '4',
+                '۵' => '5',
+                '۶' => '6',
+                '۷' => '7',
+                '۸' => '8',
+                '۹' => '9',
+            ]);
+
+            return \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $normalized)
+                ->toCarbon()
+                ->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
