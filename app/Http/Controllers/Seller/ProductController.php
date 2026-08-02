@@ -109,7 +109,6 @@ class ProductController extends Controller
         return redirect()->route('seller.dashboard')->with('success', 'محصول با موفقیت ویرایش شد');
     }
 
-    // حذف محصول
     public function destroy(Product $product)
     {
         if ($product->seller_id !== Auth::id()) {
@@ -127,27 +126,45 @@ class ProductController extends Controller
 
         $products = Product::where('seller_id', $sellerId)->get();
 
-        $orders = Order::whereHas('product', fn($q) => $q->where('seller_id', $sellerId))
+        $orders = Order::whereHas('product', function ($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        })
             ->with('product')
             ->latest('created_at')
+            ->limit(5)
             ->get();
 
-        $totalViews = $products->sum('views');
-        $totalSales = $products->sum('sales_count');
-        $totalRevenue = $orders->where('status', 'paid')->sum('amount');
+        $totalViews = Product::where('seller_id', $sellerId)
+            ->sum('views');
 
-        $thisMonth = $orders->filter(
-            fn($o) => \Carbon\Carbon::parse($o->created_at)->isCurrentMonth()
-        );
+        $totalSales = Product::where('seller_id', $sellerId)
+            ->sum('sales_count');
 
-        $chartData = $products->map(fn($p) => [
-            'title'  => $p->title,
-            'views'  => $p->views,
-            'sales'  => $p->sales_count,
-        ]);
+        $totalRevenue = Order::whereHas('product', function ($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        })->where('status', 'paid')
+            ->sum('amount');
+
+        $thisMonth = Order::whereHas('product', function ($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        })
+            ->where('status', 'paid')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        $chartData = Product::where('seller_id', $sellerId)
+            ->orderByDesc('sales_count')
+            ->orderByDesc('views')
+            ->limit(5)
+            ->get()
+            ->map(fn($p) => [
+                'title' => $p->title,
+                'views' => $p->views,
+                'sales' => $p->sales_count,
+            ]);
 
         return view('seller.analytics', compact(
-            'products',
             'orders',
             'totalViews',
             'totalSales',
@@ -155,5 +172,76 @@ class ProductController extends Controller
             'thisMonth',
             'chartData',
         ));
+    }
+
+    public function orders(Request $request)
+    {
+        $sellerId = Auth::id();
+
+
+        $query = Order::whereHas('product', function ($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        })
+            ->with('product');
+
+
+        if ($request->filled('search')) {
+
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%');
+            });
+        }
+
+
+        if ($request->filled('from_date')) {
+
+            $fromDate = $this->jalaliToGregorian($request->from_date);
+
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', $fromDate);
+            }
+        }
+
+
+        if ($request->filled('to_date')) {
+
+            $toDate = $this->jalaliToGregorian($request->to_date);
+
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', $toDate);
+            }
+        }
+
+
+        $orders = $query
+            ->latest('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+
+        return view('seller.orders', compact('orders'));
+    }
+    private function jalaliToGregorian(string $jalaliDate): ?string
+    {
+        try {
+            $normalized = strtr($jalaliDate, [
+                '۰' => '0',
+                '۱' => '1',
+                '۲' => '2',
+                '۳' => '3',
+                '۴' => '4',
+                '۵' => '5',
+                '۶' => '6',
+                '۷' => '7',
+                '۸' => '8',
+                '۹' => '9',
+            ]);
+
+            return \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $normalized)
+                ->toCarbon()
+                ->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

@@ -52,6 +52,7 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::delete('/products/{product}', [App\Http\Controllers\Seller\ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('/analytics', [App\Http\Controllers\Seller\ProductController::class, 'analytics'])->name('analytics');
+    Route::get('/orders', [App\Http\Controllers\Seller\ProductController::class, 'orders'])->name('orders');
 });
 
 Route::get('/explore', [App\Http\Controllers\ExploreController::class, 'index'])->name('explore');

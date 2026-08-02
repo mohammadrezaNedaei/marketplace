@@ -27,7 +27,7 @@
     </div>
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <p class="text-gray-400 text-xs mb-1">سفارشات این ماه</p>
-        <p class="text-2xl font-bold">{{ $thisMonth->count() }}</p>
+        <p class="text-2xl font-bold">{{ number_format($thisMonth) }}</p>
     </div>
 </div>
 
@@ -37,60 +37,39 @@
 </div>
 
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
-    <h2 class="font-bold mb-4">سفارشات این ماه</h2>
-
-    @if($thisMonth->isEmpty())
-        <p class="text-gray-400 text-sm text-center py-6">هنوز سفارشی در این ماه ثبت نشده</p>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold mb-4">سفارشات</h2>
+        <a href="{{ route('seller.orders') }}"
+        class="text-sm text-gray-500 hover:text-black transition">
+        مشاهده همه سفارشات ←
+        </a>
+    </div>
+    @if($orders->isEmpty())
+    <p class="text-gray-400 text-sm text-center py-6">هنوز سفارشی ثبت نشده</p>
     @else
         <div class="space-y-3">
-            @foreach($thisMonth as $order)
+            @foreach($orders as $order)
                 <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                     <div class="flex items-center gap-3">
                         <img src="{{ asset('storage/' . $order->product->picture_url) }}"
                              class="w-10 h-10 rounded-lg object-cover">
+
                         <div>
-                            <p class="font-medium text-sm">{{ $order->product->title }}</p>
-                            <p class="text-gray-400 text-xs">{{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($order->created_at)) }}</p>
+                            <p class="font-medium text-sm">
+                                {{ $order->product->title }}
+                            </p>
+
+                            <p class="text-gray-400 text-xs">
+                                {{ \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($order->created_at)) }}
+                            </p>
                         </div>
                     </div>
-                    <span class="font-bold text-sm">{{ number_format($order->amount) }} تومان</span>
+
+                    <span class="font-bold text-sm">
+                        {{ number_format($order->amount) }} تومان
+                    </span>
                 </div>
             @endforeach
-        </div>
-    @endif
-</div>
-
-<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-    <h2 class="font-bold mb-4">همه سفارشات</h2>
-
-    @if($orders->isEmpty())
-        <p class="text-gray-400 text-sm text-center py-6">هنوز سفارشی ثبت نشده</p>
-    @else
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="text-gray-400 border-b border-gray-100">
-                        <th class="text-right pb-3 font-medium">محصول</th>
-                        <th class="text-right pb-3 font-medium">مبلغ</th>
-                        <th class="text-right pb-3 font-medium">وضعیت</th>
-                        <th class="text-right pb-3 font-medium">تاریخ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($orders as $order)
-                        <tr class="border-b border-gray-50 last:border-0">
-                            <td class="py-3">{{ $order->product->title }}</td>
-                            <td class="py-3">{{ number_format($order->amount) }} تومان</td>
-                            <td class="py-3">
-                                <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                                    {{ $order->status }}
-                                </span>
-                            </td>
-                            <td class="py-3 text-gray-400">{{  \Morilog\Jalali\Jalalian::fromCarbon(\Carbon\Carbon::parse($order->created_at)) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
         </div>
     @endif
 </div>
