@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'تاریخچه پرداخت‌ها')
 
-@section('content')
+@section('dashboard-content')
 
     <div class="max-w-3xl mx-auto" x-data="payments()">
 

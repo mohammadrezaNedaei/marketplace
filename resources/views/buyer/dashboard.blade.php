@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'داشبورد خریدار')
 
-@section('content')
+@section('dashboard-content')
 
     <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold">داشبورد من</h1>

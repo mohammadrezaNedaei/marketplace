@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'تیکت‌های پشتیبانی')
 
-@section('content')
+@section('dashboard-content')
 
 <div class="flex items-center justify-between mb-8">
     <h1 class="text-2xl font-bold">تیکت‌های پشتیبانی</h1>
@@ -33,7 +33,6 @@
     @endforeach
 </div>
 
-{{-- لیست تیکت‌ها --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
     @forelse($tickets as $ticket)
         <a href="{{ route('admin.tickets.show', $ticket) }}"

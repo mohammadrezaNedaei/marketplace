@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'تیکت پشتیبانی')
 
-@section('content')
+@section('dashboard-content')
 
 <div class="max-w-2xl mx-auto">
 

@@ -3,6 +3,13 @@
 @section('title', 'ویرایش محصول')
 
 @section('content')
+<div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold">آنالیتیکس فروش</h1>
+    <a href="{{ route('seller.dashboard') }}"
+        class="border border-gray-300 px-5 py-2 rounded-full text-sm hover:bg-gray-50 transition">
+        بازگشت به داشبورد
+    </a>
+</div>
 <div class="max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold mb-8">ویرایش محصول</h1>
 
@@ -93,7 +100,7 @@
                 <option value="inactive" {{ $product->status === 'inactive' ? 'selected' : '' }}>غیرفعال</option>
             </select>
         </div>
-        
+
         <div class="flex gap-4">
             <button type="submit"
                 class="flex-1 bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition">

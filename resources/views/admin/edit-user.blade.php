@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'ویرایش کاربر')
 
-@section('content')
+@section('dashboard-content')
 
 <div class="max-w-lg mx-auto">
     <h1 class="text-2xl font-bold mb-8">ویرایش کاربر</h1>

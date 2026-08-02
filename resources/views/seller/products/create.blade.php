@@ -3,6 +3,13 @@
 @section('title', 'افزودن محصول')
 
 @section('content')
+<div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold">آنالیتیکس فروش</h1>
+    <a href="{{ route('seller.dashboard') }}"
+        class="border border-gray-300 px-5 py-2 rounded-full text-sm hover:bg-gray-50 transition">
+        بازگشت به داشبورد
+    </a>
+</div>
 <div class="max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold mb-8">افزودن محصول جدید</h1>
 

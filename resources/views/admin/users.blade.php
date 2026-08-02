@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'مدیریت کاربران')
 
-@section('content')
+@section('dashboard-content')
 
 <div class="flex items-center justify-between mb-8">
     <h1 class="text-2xl font-bold">مدیریت کاربران</h1>
@@ -18,7 +18,6 @@
     </div>
 @endif
 
-{{-- فیلتر --}}
 <form method="GET" action="{{ route('admin.users') }}" class="flex gap-3 mb-6">
     <input type="text" name="search" value="{{ request('search') }}"
         placeholder="جستجو بر اساس نام کاربری..."
@@ -42,7 +41,6 @@
     @endif
 </form>
 
-{{-- جدول کاربران --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
     <table class="w-full text-sm">
         <thead>
@@ -101,7 +99,6 @@
         </tbody>
     </table>
 
-    {{-- pagination --}}
     @if($users->hasPages())
         <div class="px-6 py-4 border-t border-gray-100">
             {{ $users->links() }}
