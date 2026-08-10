@@ -366,4 +366,35 @@ class AdminController extends Controller
 
         return back()->with('success', 'وضعیت سفارش بروزرسانی شد');
     }
+
+    public function activityLog(Request $request)
+    {
+        $query = \Illuminate\Support\Facades\DB::table('activity_log_view');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('actor', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('from_date')) {
+            $fromDate = $this->jalaliToGregorian($request->from_date);
+            if ($fromDate) $query->whereDate('created_at', '>=', $fromDate);
+        }
+
+        if ($request->filled('to_date')) {
+            $toDate = $this->jalaliToGregorian($request->to_date);
+            if ($toDate) $query->whereDate('created_at', '<=', $toDate);
+        }
+
+        $activityLog = $query->orderByDesc('created_at')->paginate(9)->withQueryString();
+
+        return view('admin.activity-log', compact('activityLog'));
+    }
 }

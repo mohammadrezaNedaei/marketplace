@@ -94,7 +94,12 @@
 
                         <a href="{{ route('admin.tickets') }}"
                            class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
-                            تیکت‌ها
+                            تیکت‌ ها
+                        </a>
+
+                        <a href="{{ route('admin.activity-log') }}"
+                           class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
+                            لاگ فعالیت ها
                         </a>
                     @endif
 

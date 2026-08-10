@@ -26,7 +26,8 @@
 
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <p onclick="window.location.href='{{ route('admin.categories') }}'" class="text-gray-400 text-xs mb-1">کل دسته بندی ها</p>
+            <p onclick="window.location.href='{{ route('admin.categories') }}'" class="text-gray-400 text-xs mb-1">کل دسته
+                بندی ها</p>
             <p class="text-xl font-bold">{{ number_format($totalCategories) }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -95,6 +96,11 @@
             class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
             <h2 class="font-bold mb-1">سفارشات</h2>
             <p class="text-gray-400 text-sm">مشاهده و ویرایش سفارشات</p>
+        </a>
+        <a href="{{ route('admin.activity-log') }}"
+            class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
+            <h2 class="font-bold mb-1">لاگ فعالیت‌ها</h2>
+            <p class="text-gray-400 text-sm">مشاهده کامل تمام رویدادهای پلتفرم</p>
         </a>
     </div>
 
