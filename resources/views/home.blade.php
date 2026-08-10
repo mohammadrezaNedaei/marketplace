@@ -3,7 +3,7 @@
 @section('title', 'خانه')
 
 @section('content')
-    <div class="relative -mx-4 px-4 overflow-hidden">
+    <div class="relative w-screen left-1/2 right-1/2 -mx-[50.5vw] -my-8 overflow-hidden">
 
         <div class="absolute inset-0 -z-10 overflow-hidden">
             <div class="blob blob-1"></div>

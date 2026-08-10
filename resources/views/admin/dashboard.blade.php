@@ -26,8 +26,10 @@
 
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <p onclick="window.location.href='{{ route('admin.categories') }}'" class="text-gray-400 text-xs mb-1">کل دسته
-                بندی ها</p>
+            <p onclick="window.location.href='{{ route('admin.categories') }}'"
+                class="text-gray-400 text-xs mb-1 cursor-pointer hover:text-gray-600 transition">
+                کل دسته بندی ها
+            </p>
             <p class="text-xl font-bold">{{ number_format($totalCategories) }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
