@@ -18,7 +18,7 @@ class HomeController extends Controller
 
         $categories = Category::withCount('products')
                                 ->having('products_count', '>', 0)
-                                ->orderBy('products_count', 'asc')
+                                ->orderBy('products_count', 'desc')
                                 ->take(6)
                                 ->get();
 
