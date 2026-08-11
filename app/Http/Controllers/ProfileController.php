@@ -15,14 +15,15 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        $user = Auth::user();
+
         $request->validate([
-            'username' => 'required|string|max:255|unique:users,username',
-            'phone' => 'required|string|max:11|unique:users,phone',
+            'username' => 'required|string|max:255|unique:users,username,'. $user->id,
+            'phone' => 'required|string|regex:/^09[0-9]{9}$/|unique:users,phone,'. $user->id,
             'password'         => 'nullable|string|min:6|confirmed',
             'current_password' => 'required_with:password|string',
         ]);
 
-        $user = Auth::user();
         $user->username = $request->username;
         $user->phone = $request->phone;
 

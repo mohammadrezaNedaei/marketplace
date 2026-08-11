@@ -3,9 +3,10 @@
 return [
 
     'required'  => 'فیلد :attribute الزامی است.',
-    'string'    => 'فیلد :attribute باید متن باشد.',
+    'string'    => 'فیلد :attribute باید پر شده باشد.',
     'numeric'   => 'فیلد :attribute باید عدد باشد.',
     'integer'   => 'فیلد :attribute باید عدد صحیح باشد.',
+    'regex' => 'فرمت :attribute صحیح نیست.',
     'min' => [
         'string'  => 'فیلد :attribute باید حداقل :min کاراکتر باشد.',
         'numeric' => 'فیلد :attribute باید حداقل :min باشد.',
@@ -31,6 +32,7 @@ return [
         'username'        => 'نام کاربری',
         'phone'           => 'شماره موبایل',
         'password'        => 'رمز عبور',
+        'current_password'=> 'رمز عبور فعلی',
         'role'            => 'نقش',
         'title'           => 'عنوان',
         'description'     => 'توضیحات',
