@@ -6,6 +6,7 @@ use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\ZarinpalService;
 
 class WalletController extends Controller
 {
@@ -121,9 +122,8 @@ class WalletController extends Controller
         return view('wallet.deposit');
     }
 
-    public function deposit(Request $request)
+    public function deposit(Request $request, ZarinpalService $zarinpal)
     {
-
         $request->validate([
             'amount' => 'required|numeric|min:1000'
         ], [
@@ -134,20 +134,68 @@ class WalletController extends Controller
 
         $user = Auth::user();
 
-        DB::transaction(function () use ($user, $request) {
+        $amountToman = (int) $request->amount;
+        $amountRial  = $amountToman * 10;
 
-            $user->increment('wallet_balance', $request->amount);
+        $result = $zarinpal->request(
+            amountToman: $amountRial,
+            description: 'شارژ کیف پول - ' . $user->username,
+            callbackUrl: route('wallet.deposit.callback')
+        );
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        session([
+            'zarinpal_amount_toman' => $amountToman,
+            'zarinpal_authority'    => $result['authority'],
+        ]);
+
+        return redirect($result['pay_url']);
+    }
+
+    public function depositCallback(Request $request, ZarinpalService $zarinpal)
+    {
+        $authority = $request->query('Authority');
+        $status    = $request->query('Status');
+
+        $amountToman = session('zarinpal_amount_toman');
+
+        if ($status !== 'OK' || !$amountToman || $authority !== session('zarinpal_authority')) {
+            session()->forget(['zarinpal_amount_toman', 'zarinpal_authority']);
+            return redirect()->route('wallet.deposit.form')
+                ->with('error', 'پرداخت لغو شد یا ناموفق بود');
+        }
+
+        $amountRial = $amountToman * 10;
+
+        $result = $zarinpal->verify($authority, $amountRial);
+
+        if (!$result['success']) {
+            session()->forget(['zarinpal_amount_toman', 'zarinpal_authority']);
+            return redirect()->route('wallet.deposit.form')
+                ->with('error', $result['message']);
+        }
+
+        $user = Auth::user();
+
+        DB::transaction(function () use ($user, $amountToman, $result) {
+            $user->increment('wallet_balance', $amountToman);
 
             WalletTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'deposit',
-                'amount' => $request->amount,
-                'gateway' => 'fake',
-                'transaction_id' => 'DEP-' . strtoupper(uniqid()),
+                'user_id'        => $user->id,
+                'type'           => 'deposit',
+                'amount'         => $amountToman,
+                'gateway'        => 'zarinpal',
+                'transaction_id' => $result['ref_id'],
             ]);
         });
 
-        return redirect()->route('wallet.index')->with('success', 'کیف پول با موفقیت شارژ شد');
+        session()->forget(['zarinpal_amount_toman', 'zarinpal_authority']);
+
+        return redirect()->route('wallet.index')
+            ->with('success', 'کیف پول با موفقیت شارژ شد. کد پیگیری: ' . $result['ref_id']);
     }
 
     private function jalaliToGregorian(string $jalaliDate): ?string

@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/wallet', [App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('wallet.deposit.form');
     Route::post('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'deposit'])->name('wallet.deposit');
+    Route::get('/wallet/deposit/callback', [App\Http\Controllers\WalletController::class, 'depositCallback'])->name('wallet.deposit.callback');
     Route::get('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdrawForm'])->name('wallet.withdraw.form');
     Route::post('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdraw'])->name('wallet.withdraw');
 });
