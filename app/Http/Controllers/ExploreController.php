@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 
 class ExploreController extends Controller
 {
@@ -28,6 +29,11 @@ class ExploreController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
+        if ($request->boolean('following_only') && Auth::check()) {
+            $followedSellerIds = Auth::user()->following()->pluck('users.id');
+            $query->whereIn('seller_id', $followedSellerIds);
+        }
+
         match ($request->input('sort', 'newest')) {
             'popular'    => $query->orderBy('views', 'desc'),
             'price_asc'  => $query->orderBy('price', 'asc'),
@@ -39,16 +45,16 @@ class ExploreController extends Controller
 
         return response()->json([
             'data' => $paginated->map(fn($p) => [
-                'id' => $p->id,
-                'title'=> $p->title,
-                'seller' => $p->seller->username ?? '',
-                'category' => $p->category->name ?? '',
-                'category_id' => $p->category_id,
-                'price' => $p->price,
+                'id'             => $p->id,
+                'title'          => $p->title,
+                'seller'         => $p->seller->username ?? '',
+                'category'       => $p->category->name ?? '',
+                'category_id'    => $p->category_id,
+                'price'          => $p->price,
                 'discount_price' => $p->discount_price,
-                'views' => $p->views,
-                'picture_url' => asset('storage/' . $p->picture_url),
-                'url' => route('products.show', $p->id),
+                'views'          => $p->views,
+                'picture_url'    => asset('storage/' . $p->picture_url),
+                'url'            => route('products.show', $p->id),
             ]),
             'current_page' => $paginated->currentPage(),
             'last_page'    => $paginated->lastPage(),

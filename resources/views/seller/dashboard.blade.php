@@ -18,6 +18,10 @@
                 class="bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800">
                 + افزودن محصول
             </a>
+            <a href="{{ route('seller.profile.edit') }}"
+                class="border border-gray-300 px-5 py-2 rounded-full text-sm hover:bg-gray-50 transition">
+                ویرایش فروشگاه
+            </a>
         </div>
     </div>
 

@@ -34,7 +34,18 @@ class User extends Authenticatable
         return $this->hasMany(SupportTicket::class);
     }
 
-    public function walletTransactions() {
+    public function walletTransactions()
+    {
         return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'seller_id');
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'seller_id', 'follower_id');
     }
 }

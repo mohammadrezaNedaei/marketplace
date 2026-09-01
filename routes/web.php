@@ -67,6 +67,9 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
 
     Route::get('/analytics', [App\Http\Controllers\Seller\ProductController::class, 'analytics'])->name('analytics');
     Route::get('/orders', [App\Http\Controllers\Seller\ProductController::class, 'orders'])->name('orders');
+
+    Route::get('/profile', [App\Http\Controllers\Seller\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\Seller\ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::get('/explore', [App\Http\Controllers\ExploreController::class, 'index'])->name('explore');
@@ -105,6 +108,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/products/{product}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{review}/reply', [App\Http\Controllers\ReviewController::class, 'reply'])->name('reviews.reply');
+    Route::post('/sellers/{seller}/follow', [App\Http\Controllers\FollowController::class, 'toggle'])->name('sellers.follow')->middleware('auth');
 });
 
 Route::middleware('auth')->group(function () {
@@ -115,3 +119,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdrawForm'])->name('wallet.withdraw.form');
     Route::post('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdraw'])->name('wallet.withdraw');
 });
+
+Route::get('/sellers/{seller}', [App\Http\Controllers\SellerProfileController::class, 'show'])->name('sellers.show');

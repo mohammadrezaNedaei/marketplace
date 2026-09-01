@@ -30,6 +30,15 @@
             <option value="price_desc">گران‌ترین</option>
         </select>
 
+        @auth
+            @if(Auth::user()->role === 'buyer')
+            <label class="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 text-sm cursor-pointer">
+                <input type="checkbox" x-model="followingOnly" class="rounded">
+                فقط دنبال‌شده‌ها
+            </label>
+            @endif
+        @endauth
+
         <button @click="reset()"
             class="border border-gray-300 px-5 py-2 rounded-lg text-sm hover:bg-gray-50 transition">
             پاک کردن
@@ -97,6 +106,7 @@
             search: urlParams.get('search') || '',
             selectedCategory: urlParams.get('category') || '',
             sort: urlParams.get('sort') || 'newest',
+            followingOnly: false,
             products: [],
             isLoading: false,
             currentPage: 1,
@@ -108,6 +118,7 @@
                 this.$watch('search', Alpine.debounce(() => this.resetAndFetch(), 300));
                 this.$watch('selectedCategory', () => this.resetAndFetch());
                 this.$watch('sort', () => this.resetAndFetch());
+                this.$watch('followingOnly', () => this.resetAndFetch());
             },
 
             resetAndFetch() {
@@ -123,6 +134,7 @@
                     search: this.search,
                     category_id: this.selectedCategory,
                     sort: this.sort,
+                    following_only: this.followingOnly ? '1' : '0',
                     page: this.currentPage,
                 });
 
