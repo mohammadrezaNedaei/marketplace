@@ -252,4 +252,53 @@ class WalletController extends Controller
         return redirect()->route('wallet.index')
             ->with('success', 'درخواست برداشت شما ثبت شد و در انتظار تایید ادمین است');
     }
+    // نمایش فرم کارت به کارت
+    public function cardTransferForm()
+    {
+        return view('wallet.card-transfer');
+    }
+
+    // ثبت درخواست کارت به کارت
+    public function cardTransferStore(Request $request, \App\Services\NtfyService $ntfy)
+    {
+        $request->validate([
+            'amount'         => 'required|numeric|min:1000',
+            'receipt_image'  => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'tracking_code'  => 'nullable|string|max:100',
+        ], [
+            'amount.required'        => 'وارد کردن مبلغ الزامی است.',
+            'amount.numeric'         => 'مبلغ باید عدد باشد.',
+            'amount.min'              => 'حداقل مبلغ باید ۱۰۰۰ تومان باشد.',
+            'receipt_image.required' => 'آپلود عکس رسید الزامی است.',
+            'receipt_image.image'    => 'فایل باید تصویر باشد.',
+            'receipt_image.mimes'    => 'فرمت عکس باید jpg، jpeg یا png باشد.',
+            'receipt_image.max'      => 'حجم عکس نباید بیشتر از ۲ مگابایت باشد.',
+        ]);
+
+        $user = Auth::user();
+
+        $receiptPath = $request->file('receipt_image')->store('receipts', 'public');
+
+        \App\Models\CardTransferRequest::create([
+            'user_id'        => $user->id,
+            'amount'         => $request->amount,
+            'receipt_image'  => $receiptPath,
+            'tracking_code'  => $request->tracking_code,
+            'status'         => 'pending',
+        ]);
+
+        $ntfy->send(
+            title: 'درخواست کارت به کارت جدید',
+            message: $user->username . ' مبلغ ' . number_format($request->amount) . ' تومان واریز کرد. در انتظار تایید.',
+            priority: 'high'
+        );
+
+        return redirect()->route('wallet.index')
+            ->with('success', 'درخواست شما ثبت شد و پس از بررسی توسط ادمین، کیف پول شما شارژ خواهد شد');
+    }
+
+    public function depositChoice()
+    {
+        return view('wallet.deposit-choice');
+    }
 }

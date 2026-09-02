@@ -397,4 +397,63 @@ class AdminController extends Controller
 
         return view('admin.activity-log', compact('activityLog'));
     }
+
+    // لیست درخواست‌های کارت به کارت
+    public function cardTransfers(Request $request)
+    {
+        $query = \App\Models\CardTransferRequest::with('user')->latest('created_at');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $query->whereHas('user', fn($u) => $u->where('username', 'like', '%' . $request->search . '%'));
+        }
+
+        $cardTransfers = $query->paginate(20)->withQueryString();
+
+        return view('admin.card-transfers', compact('cardTransfers'));
+    }
+
+    public function approveCardTransfer(\App\Models\CardTransferRequest $cardTransfer)
+    {
+        if ($cardTransfer->status !== 'pending') {
+            return back()->with('error', 'این درخواست قبلاً بررسی شده است');
+        }
+
+        $user = $cardTransfer->user;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($cardTransfer, $user) {
+            $user->increment('wallet_balance', $cardTransfer->amount);
+
+            \App\Models\WalletTransaction::create([
+                'user_id'        => $user->id,
+                'type'           => 'deposit',
+                'amount'         => $cardTransfer->amount,
+                'gateway'        => 'card_transfer',
+                'transaction_id' => 'CT-' . $cardTransfer->id,
+            ]);
+
+            $cardTransfer->status      = 'approved';
+            $cardTransfer->reviewed_at = now();
+            $cardTransfer->save();
+        });
+
+        return back()->with('success', 'درخواست تایید شد و کیف پول کاربر شارژ شد');
+    }
+
+    public function rejectCardTransfer(Request $request, \App\Models\CardTransferRequest $cardTransfer)
+    {
+        if ($cardTransfer->status !== 'pending') {
+            return back()->with('error', 'این درخواست قبلاً بررسی شده است');
+        }
+
+        $cardTransfer->status      = 'rejected';
+        $cardTransfer->admin_note  = $request->admin_note;
+        $cardTransfer->reviewed_at = now();
+        $cardTransfer->save();
+
+        return back()->with('success', 'درخواست رد شد');
+    }
 }

@@ -54,6 +54,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/categories/{category}', [App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
 
     Route::get('/activity-log', [App\Http\Controllers\Admin\AdminController::class, 'activityLog'])->name('activity-log');
+
+    Route::get('/card-transfers', [App\Http\Controllers\Admin\AdminController::class, 'cardTransfers'])->name('card-transfers');
+    Route::put('/card-transfers/{cardTransfer}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveCardTransfer'])->name('card-transfers.approve');
+    Route::put('/card-transfers/{cardTransfer}/reject', [App\Http\Controllers\Admin\AdminController::class, 'rejectCardTransfer'])->name('card-transfers.reject');
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
@@ -113,11 +117,14 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/wallet', [App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
-    Route::get('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('wallet.deposit.form');
+    Route::get('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'depositChoice'])->name('wallet.deposit.choice');
+    Route::get('/wallet/deposit/zarinpal', [App\Http\Controllers\WalletController::class, 'depositForm'])->name('wallet.deposit.form');
     Route::post('/wallet/deposit', [App\Http\Controllers\WalletController::class, 'deposit'])->name('wallet.deposit');
     Route::get('/wallet/deposit/callback', [App\Http\Controllers\WalletController::class, 'depositCallback'])->name('wallet.deposit.callback');
     Route::get('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdrawForm'])->name('wallet.withdraw.form');
     Route::post('/wallet/withdraw', [App\Http\Controllers\WalletController::class, 'withdraw'])->name('wallet.withdraw');
+    Route::get('/wallet/card-transfer', [App\Http\Controllers\WalletController::class, 'cardTransferForm'])->name('wallet.card-transfer.form');
+    Route::post('/wallet/card-transfer', [App\Http\Controllers\WalletController::class, 'cardTransferStore'])->name('wallet.card-transfer.store');
 });
 
 Route::get('/sellers/{seller}', [App\Http\Controllers\SellerProfileController::class, 'show'])->name('sellers.show');

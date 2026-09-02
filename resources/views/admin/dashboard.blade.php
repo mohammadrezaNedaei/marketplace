@@ -104,6 +104,11 @@
             <h2 class="font-bold mb-1">لاگ فعالیت‌ها</h2>
             <p class="text-gray-400 text-sm">مشاهده کامل تمام رویدادهای پلتفرم</p>
         </a>
+        <a href="{{ route('admin.card-transfers') }}"
+            class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
+            <h2 class="font-bold mb-1">درخواست‌های کارت به کارت</h2>
+            <p class="text-gray-400 text-sm">بررسی و تایید رسیدهای واریزی کاربران</p>
+        </a>
     </div>
 
 @endsection

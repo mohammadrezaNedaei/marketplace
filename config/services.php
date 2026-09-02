@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'ntfy' => [
+        'topic' => env('NTFY_TOPIC'),
+    ],
+
+    'card_transfer' => [
+        'card_number' => env('CARD_TRANSFER_NUMBER', '6037-XXXX-XXXX-XXXX'),
+        'card_owner'  => env('CARD_TRANSFER_OWNER', 'نام صاحب کارت'),
+    ],
+
 ];

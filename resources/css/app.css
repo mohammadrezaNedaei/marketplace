@@ -85,3 +85,89 @@ body {
     background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4) 0%, transparent 50%),
                        radial-gradient(circle at 80% 80%, rgba(74,107,92,0.15) 0%, transparent 50%);
 }
+
+.card-glow-border {
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        transparent 70%,
+        var(--color-sage, #4A6B5C) 85%,
+        transparent 100%
+    );
+    animation: rotate-border 3s linear infinite;
+}
+
+@keyframes rotate-border {
+    to {
+        --angle: 360deg;
+    }
+}
+
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.card-glow-border {
+    position: relative;
+}
+
+.card-glow-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 1rem;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        transparent 75%,
+        #4A6B5C 90%,
+        transparent 100%
+    );
+    animation: spin-border 3s linear infinite;
+    z-index: -1;
+}
+
+@keyframes spin-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.card-gradient-bg {
+    background: linear-gradient(135deg, var(--color-paper) 0%, #ffffff 55%, var(--color-paper) 100%);
+}
+
+.moving-glow {
+    animation: glow-drift 8s ease-in-out infinite;
+}
+
+@keyframes glow-drift {
+    0%, 100% {
+        top: -80px;
+        left: -80px;
+    }
+    50% {
+        top: 20px;
+        left: 60%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .moving-glow {
+        animation: none;
+        top: -80px;
+        left: -80px;
+    }
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}

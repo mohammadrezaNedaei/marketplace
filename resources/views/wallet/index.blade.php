@@ -15,7 +15,7 @@
                         برداشت وجه
                     </a>
                 @endif
-                <a href="{{ route('wallet.deposit.form') }}"
+                <a href="{{ route('wallet.deposit.choice') }}"
                     class="bg-black text-white px-5 py-2 rounded-full text-sm hover:bg-gray-800 transition">
                     + شارژ کیف پول
                 </a>

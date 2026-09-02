@@ -101,6 +101,11 @@
                            class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
                             لاگ فعالیت ها
                         </a>
+
+                        <a href="{{ route('admin.card-transfers') }}"
+                           class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
+                            درخواست‌های کارت به کارت
+                        </a>
                     @endif
 
                     <hr>
