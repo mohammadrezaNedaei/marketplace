@@ -252,13 +252,13 @@ class WalletController extends Controller
         return redirect()->route('wallet.index')
             ->with('success', 'درخواست برداشت شما ثبت شد و در انتظار تایید ادمین است');
     }
-    // نمایش فرم کارت به کارت
+
     public function cardTransferForm()
     {
         return view('wallet.card-transfer');
     }
 
-    // ثبت درخواست کارت به کارت
+
     public function cardTransferStore(Request $request, \App\Services\NtfyService $ntfy)
     {
         $request->validate([
