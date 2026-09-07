@@ -24,11 +24,18 @@ class ProductController extends Controller
                 ->with(['user:id,username', 'replies.user:id,username'])
                 ->latest('created_at'),
         ]);
-        if (Auth::check()) {
-            Auth::user()->load('orders');
+        $myReview = null;
+        if (Auth::check() && Auth::user()->role === 'buyer') {
+            $myReview = $product->reviews()
+                ->where('user_id', Auth::id())
+                ->whereNull('answer_to_id')
+                ->first();
         }
 
-        return view('products.show', compact('product'));
+        $averageRating = $product->verifiedAverageRating();
+        $verifiedRatingCount = $product->verifiedReviews()->count();
+
+        return view('products.show', compact('product', 'myReview', 'averageRating', 'verifiedRatingCount'));
     }
 
     private function recordView(Product $product): void
@@ -85,7 +92,7 @@ class ProductController extends Controller
         return back()->with('saved', $saved);
     }
 
-    public function toggleLike(Product $product) 
+    public function toggleLike(Product $product)
     {
         if (!Auth::check() || Auth::user()->role == 'admin') {
             abort(403);

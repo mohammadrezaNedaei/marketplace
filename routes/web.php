@@ -110,9 +110,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/follows', [App\Http\Controllers\FollowController::class, 'index'])->name('follows.index');
     Route::post('/products/{product}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{review}/reply', [App\Http\Controllers\ReviewController::class, 'reply'])->name('reviews.reply');
-    Route::post('/sellers/{seller}/follow', [App\Http\Controllers\FollowController::class, 'toggle'])->name('sellers.follow')->middleware('auth');
+    Route::post('/sellers/{seller}/follow', [App\Http\Controllers\FollowController::class, 'toggle'])->name('sellers.follow');
 });
 
 Route::middleware('auth')->group(function () {

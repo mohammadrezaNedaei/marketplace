@@ -40,6 +40,21 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function verifiedReviews()
+    {
+        return $this->reviews()
+            ->where('approved', true)
+            ->whereNull('answer_to_id')
+            ->where('verified_purchase', true)
+            ->whereNotNull('rating');
+    }
+
+    public function verifiedAverageRating(): ?float
+    {
+        $average = $this->verifiedReviews()->avg('rating');
+        return $average !== null ? (float) $average : null;
+    }
+
     public function likes()
     {
         return $this->hasMany(Like::class);

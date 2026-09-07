@@ -21,6 +21,8 @@ class SellerProfileController extends Controller
             'average_rating'   => $seller->products()
                                          ->join('reviews', 'reviews.product_id', '=', 'products.id')
                                          ->where('reviews.approved', true)
+                                         ->where('reviews.verified_purchase', true)
+                                         ->whereNull('reviews.answer_to_id')
                                          ->whereNotNull('reviews.rating')
                                          ->avg('reviews.rating'),
             'followers_count'  => $seller->followers()->count(),

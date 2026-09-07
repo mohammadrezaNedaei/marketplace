@@ -32,6 +32,11 @@
                             ذخیره‌ها
                         </a>
 
+                        <a href="{{ route('follows.index') }}"
+                           class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
+                            دنبال‌شده‌ها
+                        </a>
+
                         <a href="{{ route('buyer.payments') }}"
                            class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
                             پرداخت‌ها
@@ -55,6 +60,11 @@
                         <a href="{{ route('seller.analytics') }}"
                            class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
                             آنالیتیکس
+                        </a>
+
+                        <a href="{{ route('follows.index') }}"
+                           class="block rounded-xl px-4 py-2 transition hover:bg-gray-100">
+                            دنبال‌کننده‌ها
                         </a>
                     @endif
 

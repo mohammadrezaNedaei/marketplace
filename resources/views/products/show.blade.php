@@ -34,9 +34,16 @@
                             </a>
                         </p>
 
-                        <div class="flex items-center gap-4 text-sm text-gray-400 mb-6">
-                            <span>
-                                {{ $product->views }} بازدید · {{ $product->sales_count }} فروش
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-6">
+                            <span>{{ $product->views }} بازدید · {{ $product->sales_count }} فروش</span>
+                            <span class="font-medium text-gray-600">
+                                @if ($averageRating !== null)
+                                    ⭐ {{ number_format($averageRating, 1) }}
+                                    <span class="font-normal text-gray-400">({{ number_format($verifiedRatingCount) }}
+                                        امتیاز تاییدشده)</span>
+                                @else
+                                    بدون امتیاز تاییدشده
+                                @endif
                             </span>
 
                             @auth
@@ -147,25 +154,29 @@
 
             @auth
                 @if (auth()->user()->role === 'buyer')
-                    <form method="POST" action="{{ route('reviews.store', $product) }}" class="mb-8">
+                    <form method="POST" action="{{ route('reviews.store', $product) }}"
+                        class="mb-8 bg-gray-50 rounded-2xl p-5">
                         @csrf
+                        <h3 class="font-bold mb-1">{{ $myReview ? 'ویرایش نظر شما' : 'نظر شما' }}</h3>
+                        <p class="text-xs text-gray-400 mb-4">هر خریدار برای هر محصول فقط یک نظر و یک امتیاز مؤثر دارد.</p>
                         <div class="mb-3">
                             <label class="block text-sm font-medium mb-1">امتیاز</label>
                             <select name="rating"
                                 class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black">
-                                <option value="5">⭐⭐⭐⭐⭐ عالی</option>
-                                <option value="4">⭐⭐⭐⭐ خوب</option>
-                                <option value="3">⭐⭐⭐ متوسط</option>
-                                <option value="2">⭐⭐ ضعیف</option>
-                                <option value="1">⭐ خیلی ضعیف</option>
+                                @foreach ([5 => '⭐⭐⭐⭐⭐ عالی', 4 => '⭐⭐⭐⭐ خوب', 3 => '⭐⭐⭐ متوسط', 2 => '⭐⭐ ضعیف', 1 => '⭐ خیلی ضعیف'] as $value => $label)
+                                    <option value="{{ $value }}" @selected(old('rating', $myReview?->rating ?? 5) == $value)>{{ $label }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         <textarea name="comment" rows="3" placeholder="نظر خود را بنویسید..."
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black mb-3"></textarea>
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black mb-3">{{ old('comment', $myReview?->comment) }}</textarea>
                         <button type="submit"
-                            class="bg-black text-white px-6 py-2 rounded-lg text-sm hover:bg-gray-800 transition">
-                            ثبت نظر
-                        </button>
+                            class="bg-black text-white px-6 py-2 rounded-lg text-sm hover:bg-gray-800 transition">{{ $myReview ? 'ویرایش نظر' : 'ثبت نظر' }}</button>
+                        @if ($myReview)
+                            <span
+                                class="text-xs text-gray-400 mr-3">{{ $myReview->verified_purchase ? 'خرید شما تایید شده است' : 'خرید تایید نشده' }}</span>
+                        @endif
                     </form>
                 @endif
             @endauth
@@ -174,9 +185,17 @@
                 <div class="border-b border-gray-100 pb-6 mb-6 p-4 last:border-3 rounded-xl">
                     <div class="flex items-center justify-between mb-2">
                         <span class="font-medium text-sm">{{ $review->user->username }}</span>
-                        <span class="text-xs text-gray-400">
-                            {{ str_repeat('⭐', $review->rating) }}
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">{{ str_repeat('⭐', $review->rating) }}</span>
+                            @if ($review->verified_purchase)
+                                <span
+                                    class="text-[11px] bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full">خرید
+                                    تاییدشده</span>
+                            @else
+                                <span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">خرید
+                                    تاییدنشده</span>
+                            @endif
+                        </div>
                     </div>
                     <p class="text-gray-600 text-sm">{{ $review->comment }}</p>
 
@@ -189,16 +208,21 @@
                     @endforeach
 
                     @auth
-                        <form method="POST" action="{{ route('reviews.reply', $review) }}" class="mr-6 mt-4 flex gap-2">
-                            @csrf
-                            <input type="text" name="comment" placeholder="پاسخ ..."
-                                class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black">
-                            <button type="submit"
-                                class="bg-black text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-800 transition">
-                                ارسال
-                            </button>
-                        </form>
+                        @if (auth()->id() !== $review->user_id)
+                            <form method="POST" action="{{ route('reviews.reply', $review) }}" class="mr-6 mt-4 flex gap-2">
+                                @csrf
+
+                                <input type="text" name="comment" placeholder="پاسخ ..."
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+
+                                <button type="submit"
+                                    class="bg-black text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-800 transition">
+                                    ارسال
+                                </button>
+                            </form>
+                        @endif
                     @endauth
+
                 </div>
             @empty
                 <p class="text-gray-400 text-sm text-center py-8">هنوز نظری ثبت نشده</p>

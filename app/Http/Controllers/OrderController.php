@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\WalletTransaction;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,11 @@ class OrderController extends Controller
 
         $seller = $product->seller;
         $seller->increment('wallet_balance', $price);
+
+        Review::where('product_id', $product->id)
+            ->where('user_id', $buyer->id)
+            ->whereNull('answer_to_id')
+            ->update(['verified_purchase' => true]);
 
         WalletTransaction::create([
             'user_id'  => $seller->id,
@@ -120,6 +126,11 @@ class OrderController extends Controller
 
             $seller = $order->product->seller;
             $seller->increment('wallet_balance', $order->amount);
+
+            Review::where('product_id', $order->product_id)
+                ->where('user_id', $buyer->id)
+                ->whereNull('answer_to_id')
+                ->update(['verified_purchase' => true]);
 
             WalletTransaction::create([
                 'user_id'  => $seller->id,

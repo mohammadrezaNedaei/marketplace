@@ -8,11 +8,17 @@ class Review extends Model
 {
     public $timestamps = false;
 
+    protected $casts = [
+        'verified_purchase' => 'boolean',
+        'approved' => 'boolean',
+    ];
+
     protected $fillable = [
         'product_id',
         'user_id',
         'answer_to_id',
         'rating',
+        'verified_purchase',
         'comment',
         'approved',
     ];

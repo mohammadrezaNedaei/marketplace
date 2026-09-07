@@ -6,11 +6,9 @@
 
 <div class="max-w-5xl mx-auto">
 
-    {{-- هدر پروفایل --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-8">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
 
-            {{-- آواتار --}}
             <img src="{{ $seller->avatar ? asset('storage/' . $seller->avatar) : 'https://ui-avatars.com/api/?name=' . $seller->username . '&size=128' }}"
                  class="w-28 h-28 rounded-full object-cover shrink-0">
 
@@ -18,7 +16,6 @@
                 <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                     <h1 class="text-2xl font-bold">{{ $seller->username }}</h1>
 
-                    {{-- دکمه دنبال کردن --}}
                     @auth
                         @if(Auth::user()->role === 'buyer')
                             <form method="POST" action="{{ route('sellers.follow', $seller) }}">
@@ -46,7 +43,6 @@
             </div>
         </div>
 
-        {{-- آمار --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-gray-100">
             <div class="text-center">
                 <p class="text-xl font-bold">{{ number_format($stats['active_products']) }}</p>
@@ -72,7 +68,6 @@
         </div>
     </div>
 
-    {{-- محصولات --}}
     <div class="mb-10">
         <h2 class="text-lg font-bold mb-4">محصولات</h2>
 
@@ -105,9 +100,13 @@
         @endif
     </div>
 
-    {{-- نظرات دریافت‌شده --}}
     <div>
-        <h2 class="text-lg font-bold mb-4">نظرات ({{ $reviews->total() }})</h2>
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-bold">نظرات ({{ $reviews->total() }})</h2>
+                <p class="text-xs text-gray-400 mt-1">میانگین امتیاز فقط از خریدهای تاییدشده محاسبه می‌شود.</p>
+            </div>
+        </div>
 
         @if($reviews->isEmpty())
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
@@ -119,7 +118,14 @@
                     <div class="px-6 py-4 border-b border-gray-50 last:border-0">
                         <div class="flex items-center justify-between mb-1">
                             <span class="font-medium text-sm">{{ $review->user->username }}</span>
-                            <span class="text-xs text-gray-400">{{ str_repeat('⭐', $review->rating) }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400">{{ str_repeat('⭐', $review->rating) }}</span>
+                                @if($review->verified_purchase)
+                                    <span class="text-[11px] bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full">خرید تاییدشده</span>
+                                @else
+                                    <span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">خرید تاییدنشده</span>
+                                @endif
+                            </div>
                         </div>
                         <p class="text-gray-400 text-xs mb-2">
                             درباره‌ی

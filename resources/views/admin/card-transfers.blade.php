@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'درخواست‌های کارت به کارت')
 
-@section('content')
+@section('dashboard-content')
 
     <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold">درخواست‌های کارت به کارت</h1>
