@@ -44,9 +44,27 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium mb-1">رمز عبور جدید (اختیاری)</label>
-            <input type="password" name="password"
+            <label class="block text-sm font-medium mb-1">وضعیت حساب</label>
+            <select name="status"
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black">
+                <option value="active"   {{ old('status', $user->status) == 'active'   ? 'selected' : '' }}>فعال</option>
+                <option value="inactive" {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>غیرفعال</option>
+            </select>
+            <p class="text-gray-400 text-xs mt-1">کاربران غیرفعال فقط به بخش تیکت پشتیبانی دسترسی دارند</p>
+            @error('status')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div x-data="{ showPassword: false }" class="relative">
+            <label class="block text-sm font-medium mb-1">رمز عبور جدید (اختیاری)</label>
+            <input :type="showPassword ? 'text' : 'password'" name="password"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-black">
+            <button type="button" @click="showPassword = !showPassword"
+                class="absolute left-3 top-9 text-gray-400 hover:text-gray-600 transition text-sm">
+                <span x-show="!showPassword">👁️</span>
+                <span x-show="showPassword">🙈</span>
+            </button>
             <p class="text-gray-400 text-xs mt-1">اگر نمی‌خواهید تغییر دهید خالی بگذارید</p>
             @error('password')
                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

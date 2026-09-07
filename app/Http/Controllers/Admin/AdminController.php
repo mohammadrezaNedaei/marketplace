@@ -101,11 +101,13 @@ class AdminController extends Controller
             'phone'    => 'nullable|string|max:20',
             'role'     => 'required|in:buyer,seller,admin',
             'password' => 'nullable|string|min:6',
+            'status'   => 'required|in:active,inactive'
         ]);
 
         $user->username = $request->username;
         $user->phone    = $request->phone;
         $user->role     = $request->role;
+        $user->status   = $request->status;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
