@@ -400,7 +400,6 @@ class AdminController extends Controller
         return view('admin.activity-log', compact('activityLog'));
     }
 
-    // لیست درخواست‌های کارت به کارت
     public function cardTransfers(Request $request)
     {
         $query = \App\Models\CardTransferRequest::with('user')->latest('created_at');
