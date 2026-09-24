@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CardTransferRequest;
 use App\Models\WalletTransaction;
+use App\Models\WithdrawalRequest;
+use App\Services\NtfyService;
+use App\Services\ZarinpalService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Services\ZarinpalService;
+use Morilog\Jalali\Jalalian;
 
 class WalletController extends Controller
 {
@@ -43,12 +48,16 @@ class WalletController extends Controller
 
         if ($request->filled('from_date')) {
             $fromDate = $this->jalaliToGregorian($request->from_date);
-            if ($fromDate) $walletQuery->whereDate('created_at', '>=', $fromDate);
+            if ($fromDate) {
+                $walletQuery->whereDate('created_at', '>=', $fromDate);
+            }
         }
 
         if ($request->filled('to_date')) {
             $toDate = $this->jalaliToGregorian($request->to_date);
-            if ($toDate) $walletQuery->whereDate('created_at', '<=', $toDate);
+            if ($toDate) {
+                $walletQuery->whereDate('created_at', '<=', $toDate);
+            }
         }
 
         if ($request->filled('min_amount')) {
@@ -59,25 +68,29 @@ class WalletController extends Controller
             $walletQuery->where('amount', '<=', $request->max_amount);
         }
 
-        $walletItems = $walletQuery->get()->map(fn($t) => [
-            'source'    => 'wallet',
-            'type'      => $t->type,
-            'amount'    => $t->amount,
-            'status'    => null,
+        $walletItems = $walletQuery->get()->map(fn ($t) => [
+            'source' => 'wallet',
+            'type' => $t->type,
+            'amount' => $t->amount,
+            'status' => null,
             'created_at' => $t->created_at,
         ]);
 
-        $withdrawalQuery = \App\Models\WithdrawalRequest::where('user_id', Auth::id())
+        $withdrawalQuery = WithdrawalRequest::where('user_id', Auth::id())
             ->whereIn('status', ['pending', 'rejected']);
 
         if ($request->filled('from_date')) {
             $fromDate = $this->jalaliToGregorian($request->from_date);
-            if ($fromDate) $withdrawalQuery->whereDate('created_at', '>=', $fromDate);
+            if ($fromDate) {
+                $withdrawalQuery->whereDate('created_at', '>=', $fromDate);
+            }
         }
 
         if ($request->filled('to_date')) {
             $toDate = $this->jalaliToGregorian($request->to_date);
-            if ($toDate) $withdrawalQuery->whereDate('created_at', '<=', $toDate);
+            if ($toDate) {
+                $withdrawalQuery->whereDate('created_at', '<=', $toDate);
+            }
         }
 
         if ($request->filled('min_amount')) {
@@ -88,12 +101,12 @@ class WalletController extends Controller
             $withdrawalQuery->where('amount', '<=', $request->max_amount);
         }
 
-        if (!$request->filled('type') || $request->type === 'withdrawal') {
-            $withdrawalItems = $withdrawalQuery->get()->map(fn($w) => [
-                'source'    => 'withdrawal_request',
-                'type'      => 'withdrawal',
-                'amount'    => $w->amount,
-                'status'    => $w->status,
+        if (! $request->filled('type') || $request->type === 'withdrawal') {
+            $withdrawalItems = $withdrawalQuery->get()->map(fn ($w) => [
+                'source' => 'withdrawal_request',
+                'type' => 'withdrawal',
+                'amount' => $w->amount,
+                'status' => $w->status,
                 'created_at' => $w->created_at,
             ]);
         } else {
@@ -104,9 +117,9 @@ class WalletController extends Controller
             ->sortByDesc('created_at')
             ->values();
 
-        $page    = $request->input('page', 1);
+        $page = $request->input('page', 1);
         $perPage = 10;
-        $transactions = new \Illuminate\Pagination\LengthAwarePaginator(
+        $transactions = new LengthAwarePaginator(
             $allTransactions->forPage($page, $perPage),
             $allTransactions->count(),
             $perPage,
@@ -125,7 +138,7 @@ class WalletController extends Controller
     public function deposit(Request $request, ZarinpalService $zarinpal)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:1000'
+            'amount' => 'required|numeric|min:1000',
         ], [
             'amount.required' => 'وارد کردن مبلغ الزامی است.',
             'amount.numeric' => 'حداقل مبلغ باید عدد باشد.',
@@ -135,21 +148,21 @@ class WalletController extends Controller
         $user = Auth::user();
 
         $amountToman = (int) $request->amount;
-        $amountRial  = $amountToman * 10;
+        $amountRial = $amountToman * 10;
 
         $result = $zarinpal->request(
             amountToman: $amountRial,
-            description: 'شارژ کیف پول - ' . $user->username,
+            description: 'شارژ کیف پول - '.$user->username,
             callbackUrl: route('wallet.deposit.callback')
         );
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return back()->with('error', $result['message']);
         }
 
         session([
             'zarinpal_amount_toman' => $amountToman,
-            'zarinpal_authority'    => $result['authority'],
+            'zarinpal_authority' => $result['authority'],
         ]);
 
         return redirect($result['pay_url']);
@@ -158,12 +171,13 @@ class WalletController extends Controller
     public function depositCallback(Request $request, ZarinpalService $zarinpal)
     {
         $authority = $request->query('Authority');
-        $status    = $request->query('Status');
+        $status = $request->query('Status');
 
         $amountToman = session('zarinpal_amount_toman');
 
-        if ($status !== 'OK' || !$amountToman || $authority !== session('zarinpal_authority')) {
+        if ($status !== 'OK' || ! $amountToman || $authority !== session('zarinpal_authority')) {
             session()->forget(['zarinpal_amount_toman', 'zarinpal_authority']);
+
             return redirect()->route('wallet.deposit.form')
                 ->with('error', 'پرداخت لغو شد یا ناموفق بود');
         }
@@ -172,8 +186,9 @@ class WalletController extends Controller
 
         $result = $zarinpal->verify($authority, $amountRial);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             session()->forget(['zarinpal_amount_toman', 'zarinpal_authority']);
+
             return redirect()->route('wallet.deposit.form')
                 ->with('error', $result['message']);
         }
@@ -184,10 +199,10 @@ class WalletController extends Controller
             $user->increment('wallet_balance', $amountToman);
 
             WalletTransaction::create([
-                'user_id'        => $user->id,
-                'type'           => 'deposit',
-                'amount'         => $amountToman,
-                'gateway'        => 'zarinpal',
+                'user_id' => $user->id,
+                'type' => 'deposit',
+                'amount' => $amountToman,
+                'gateway' => 'zarinpal',
                 'transaction_id' => $result['ref_id'],
             ]);
         });
@@ -195,7 +210,7 @@ class WalletController extends Controller
         session()->forget(['zarinpal_amount_toman', 'zarinpal_authority']);
 
         return redirect()->route('wallet.index')
-            ->with('success', 'کیف پول با موفقیت شارژ شد. کد پیگیری: ' . $result['ref_id']);
+            ->with('success', 'کیف پول با موفقیت شارژ شد. کد پیگیری: '.$result['ref_id']);
     }
 
     private function jalaliToGregorian(string $jalaliDate): ?string
@@ -214,7 +229,7 @@ class WalletController extends Controller
                 '۹' => '9',
             ]);
 
-            return \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $normalized)
+            return Jalalian::fromFormat('Y/m/d', $normalized)
                 ->toCarbon()
                 ->format('Y-m-d');
         } catch (\Exception $e) {
@@ -229,25 +244,27 @@ class WalletController extends Controller
 
     public function withdraw(Request $request)
     {
-        $user = Auth::user();
-
         $request->validate([
-            'amount' => 'required|numeric|min:1000'
+            'amount' => 'required|numeric|min:1000',
         ], [
             'amount.required' => 'وارد کردن مبلغ الزامی است.',
             'amount.numeric' => 'حداقل مبلغ باید عدد باشد.',
             'amount.min' => 'حداقل مبلغ باید حداقل ۱۰۰۰ تومان باشد.',
         ]);
 
-        if ($request->amount > $user->wallet_balance) {
-            return back()->withErrors(['amount' => 'موجودی کیف پول شما کافی نیست']);
-        }
+        DB::transaction(function () use ($request) {
+            $user = User::lockForUpdate()->find(Auth::id());
 
-        \App\Models\WithdrawalRequest::create([
-            'user_id' => $user->id,
-            'amount'  => $request->amount,
-            'status'  => 'pending',
-        ]);
+            if ($request->amount > $user->wallet_balance) {
+                return back()->withErrors(['amount' => 'موجودی کیف پول شما کافی نیست']);
+            }
+
+            WithdrawalRequest::create([
+                'user_id' => $user->id,
+                'amount' => $request->amount,
+                'status' => 'pending',
+            ]);
+        });
 
         return redirect()->route('wallet.index')
             ->with('success', 'درخواست برداشت شما ثبت شد و در انتظار تایید ادمین است');
@@ -258,40 +275,43 @@ class WalletController extends Controller
         return view('wallet.card-transfer');
     }
 
-
-    public function cardTransferStore(Request $request, \App\Services\NtfyService $ntfy)
+    public function cardTransferStore(Request $request, NtfyService $ntfy)
     {
         $request->validate([
-            'amount'         => 'required|numeric|min:1000',
-            'receipt_image'  => 'required|image|mimes:jpg,jpeg,png|max:2048',
-            'tracking_code'  => 'nullable|string|max:100',
+            'amount' => 'required|numeric|min:1000',
+            'receipt_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'tracking_code' => 'nullable|string|max:100',
         ], [
-            'amount.required'        => 'وارد کردن مبلغ الزامی است.',
-            'amount.numeric'         => 'مبلغ باید عدد باشد.',
-            'amount.min'              => 'حداقل مبلغ باید ۱۰۰۰ تومان باشد.',
+            'amount.required' => 'وارد کردن مبلغ الزامی است.',
+            'amount.numeric' => 'مبلغ باید عدد باشد.',
+            'amount.min' => 'حداقل مبلغ باید ۱۰۰۰ تومان باشد.',
             'receipt_image.required' => 'آپلود عکس رسید الزامی است.',
-            'receipt_image.image'    => 'فایل باید تصویر باشد.',
-            'receipt_image.mimes'    => 'فرمت عکس باید jpg، jpeg یا png باشد.',
-            'receipt_image.max'      => 'حجم عکس نباید بیشتر از ۲ مگابایت باشد.',
+            'receipt_image.image' => 'فایل باید تصویر باشد.',
+            'receipt_image.mimes' => 'فرمت عکس باید jpg، jpeg یا png باشد.',
+            'receipt_image.max' => 'حجم عکس نباید بیشتر از ۲ مگابایت باشد.',
         ]);
 
         $user = Auth::user();
 
-        $receiptPath = $request->file('receipt_image')->store('receipts', 'public');
+        $receiptPath = $request->file('receipt_image')->store('receipts', 'local');
 
-        \App\Models\CardTransferRequest::create([
-            'user_id'        => $user->id,
-            'amount'         => $request->amount,
-            'receipt_image'  => $receiptPath,
-            'tracking_code'  => $request->tracking_code,
-            'status'         => 'pending',
+        CardTransferRequest::create([
+            'user_id' => $user->id,
+            'amount' => $request->amount,
+            'receipt_image' => $receiptPath,
+            'tracking_code' => $request->tracking_code,
+            'status' => 'pending',
         ]);
 
-        $ntfy->send(
-            title: 'درخواست کارت به کارت جدید',
-            message: $user->username . ' مبلغ ' . number_format($request->amount) . ' تومان واریز کرد. در انتظار تایید.',
-            priority: 'high'
-        );
+        try {
+            $ntfy->send(
+                title: 'درخواست کارت به کارت جدید',
+                message: $user->username.' مبلغ '.number_format($request->amount).' تومان واریز کرد. در انتظار تایید.',
+                priority: 'high'
+            );
+        } catch (\Exception $e) {
+            \Log::error('Ntfy failed: '.$e->getMessage());
+        }
 
         return redirect()->route('wallet.index')
             ->with('success', 'درخواست شما ثبت شد و پس از بررسی توسط ادمین، کیف پول شما شارژ خواهد شد');

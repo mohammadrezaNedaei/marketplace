@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Like;
 use App\Models\Product;
 use App\Models\ProductView;
+use App\Models\Save;
 use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
@@ -19,7 +21,7 @@ class ProductController extends Controller
         $product->load([
             'seller:id,username',
             'category:id,name',
-            'reviews' => fn($q) => $q->where('approved', true)
+            'reviews' => fn ($q) => $q->where('approved', true)
                 ->whereNull('answer_to_id')
                 ->with(['user:id,username', 'replies.user:id,username'])
                 ->latest('created_at'),
@@ -51,7 +53,7 @@ class ProductController extends Controller
                 ->where('user_id', Auth::id())
                 ->exists();
 
-            if (!$alreadyViewed) {
+            if (! $alreadyViewed) {
                 ProductView::create([
                     'product_id' => $product->id,
                     'user_id' => Auth::id(),
@@ -59,9 +61,9 @@ class ProductController extends Controller
                 $product->increment('views');
             }
         } else {
-            $viewedKey = 'viewed_product_' . $product->id;
+            $viewedKey = 'viewed_product_'.$product->id;
 
-            if (!session()->has($viewedKey)) {
+            if (! session()->has($viewedKey)) {
                 session()->put($viewedKey, true);
                 $product->increment('views');
             }
@@ -70,11 +72,11 @@ class ProductController extends Controller
 
     public function toggleSave(Product $product)
     {
-        if (!Auth::check() || Auth::user()->role !== 'buyer') {
+        if (! Auth::check() || Auth::user()->role !== 'buyer') {
             abort(403);
         }
 
-        $existing = \App\Models\Save::where('user_id', Auth::id())
+        $existing = Save::where('user_id', Auth::id())
             ->where('product_id', $product->id)
             ->first();
 
@@ -82,8 +84,8 @@ class ProductController extends Controller
             $existing->delete();
             $saved = false;
         } else {
-            \App\Models\Save::create([
-                'user_id'    => Auth::id(),
+            Save::create([
+                'user_id' => Auth::id(),
                 'product_id' => $product->id,
             ]);
             $saved = true;
@@ -94,11 +96,11 @@ class ProductController extends Controller
 
     public function toggleLike(Product $product)
     {
-        if (!Auth::check() || Auth::user()->role == 'admin') {
+        if (! Auth::check() || Auth::user()->role === 'admin') {
             abort(403);
         }
 
-        $existing = \App\Models\Like::where('user_id', Auth::id())
+        $existing = Like::where('user_id', Auth::id())
             ->where('product_id', $product->id)
             ->first();
 
@@ -106,13 +108,13 @@ class ProductController extends Controller
             $existing->delete();
             $liked = false;
         } else {
-            \App\Models\Like::create([
-                'user_id'    => Auth::id(),
+            Like::create([
+                'user_id' => Auth::id(),
                 'product_id' => $product->id,
             ]);
             $liked = true;
         }
+
         return back()->with('liked', $liked);
     }
-
 }

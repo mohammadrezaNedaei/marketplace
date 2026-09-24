@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\WalletTransaction;
 use App\Models\Review;
+use App\Models\User;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,50 +34,52 @@ class OrderController extends Controller
         }
 
         $price = $product->discount_price ?? $product->price;
-        $buyer = Auth::user();
+        $order = null;
 
-        if ($buyer->wallet_balance < $price) {
-        return redirect()->route('products.show', $product)
-                         ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
-        }
+        DB::transaction(function () use ($product, $price, &$order) {
+            $buyer = User::lockForUpdate()->find(Auth::id());
 
-        DB::transaction(function () use ($buyer, $product, $price, &$order) {
-        $buyer->decrement('wallet_balance', $price);
+            if ($buyer->wallet_balance < $price) {
+                return redirect()->route('products.show', $product)
+                    ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
+            }
 
-        $order = Order::create([
-            'user_id'         => $buyer->id,
-            'product_id'      => $product->id,
-            'quantity'        => 1,
-            'amount'          => $price,
-            'status'          => 'paid',
-            'payment_gateway' => 'wallet',
-            'transaction_id'  => 'ORD-' . strtoupper(uniqid()),
-        ]);
+            $buyer->decrement('wallet_balance', $price);
 
-        WalletTransaction::create([
-            'user_id'  => $buyer->id,
-            'type'     => 'purchase',
-            'amount'   => $price,
-            'order_id' => $order->id,
-        ]);
+            $order = Order::create([
+                'user_id' => $buyer->id,
+                'product_id' => $product->id,
+                'quantity' => 1,
+                'amount' => $price,
+                'status' => 'paid',
+                'payment_gateway' => 'wallet',
+                'transaction_id' => 'ORD-'.strtoupper(uniqid()),
+            ]);
 
-        $seller = $product->seller;
-        $seller->increment('wallet_balance', $price);
+            WalletTransaction::create([
+                'user_id' => $buyer->id,
+                'type' => 'purchase',
+                'amount' => $price,
+                'order_id' => $order->id,
+            ]);
 
-        Review::where('product_id', $product->id)
-            ->where('user_id', $buyer->id)
-            ->whereNull('answer_to_id')
-            ->update(['verified_purchase' => true]);
+            $seller = $product->seller;
+            $seller->increment('wallet_balance', $price);
 
-        WalletTransaction::create([
-            'user_id'  => $seller->id,
-            'type'     => 'income',
-            'amount'   => $price,
-            'order_id' => $order->id,
-        ]);
+            Review::where('product_id', $product->id)
+                ->where('user_id', $buyer->id)
+                ->whereNull('answer_to_id')
+                ->update(['verified_purchase' => true]);
 
-        $product->increment('sales_count');
-    });
+            WalletTransaction::create([
+                'user_id' => $seller->id,
+                'type' => 'income',
+                'amount' => $price,
+                'order_id' => $order->id,
+            ]);
+
+            $product->increment('sales_count');
+        });
 
         return redirect()->route('orders.show', $order)
             ->with('success', 'خرید با موفقیت انجام شد');
@@ -93,24 +96,30 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
-    public function pay(Order $order) {
+    public function pay(Order $order)
+    {
 
-        if($order->user_id !== Auth::id()){
+        if ($order->user_id !== Auth::id()) {
             abort(403);
         }
 
         if ($order->status !== 'pending') {
-        return redirect()->route('buyer.payments')->with('error', 'این سفارش قبلاً پردازش شده است');
+            return redirect()->route('buyer.payments')->with('error', 'این سفارش قبلاً پردازش شده است');
         }
 
-        $buyer = Auth::user();
+        DB::transaction(function () use ($order) {
+            $order = Order::lockForUpdate()->find($order->id);
 
-        if ($buyer->wallet_balance < $order->amount) {
-        return redirect()->route('buyer.payments')
-                         ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
-        }
+            if ($order->status !== 'pending') {
+                return redirect()->route('buyer.payments')->with('error', 'این سفارش قبلاً پردازش شده است');
+            }
 
-        DB::transaction(function () use ($buyer, $order) {
+            $buyer = User::lockForUpdate()->find(Auth::id());
+
+            if ($buyer->wallet_balance < $order->amount) {
+                return redirect()->route('buyer.payments')
+                    ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
+            }
 
             $buyer->decrement('wallet_balance', $order->amount);
 
@@ -118,7 +127,7 @@ class OrderController extends Controller
             $order->save();
 
             WalletTransaction::create([
-                'user_id'  => $buyer->id,
+                'user_id' => $buyer->id,
                 'type' => 'purchase',
                 'amount' => $order->amount,
                 'order_id' => $order->id,
@@ -133,7 +142,7 @@ class OrderController extends Controller
                 ->update(['verified_purchase' => true]);
 
             WalletTransaction::create([
-                'user_id'  => $seller->id,
+                'user_id' => $seller->id,
                 'type' => 'income',
                 'amount' => $order->amount,
                 'order_id' => $order->id,

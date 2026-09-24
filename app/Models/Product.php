@@ -16,8 +16,6 @@ class Product extends Model
         'discount_price',
         'file_url',
         'status',
-        'views',
-        'sales_count',
     ];
 
     public function seller()
@@ -52,6 +50,7 @@ class Product extends Model
     public function verifiedAverageRating(): ?float
     {
         $average = $this->verifiedReviews()->avg('rating');
+
         return $average !== null ? (float) $average : null;
     }
 
