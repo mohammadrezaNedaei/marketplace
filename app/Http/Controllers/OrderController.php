@@ -10,6 +10,7 @@ use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -40,8 +41,9 @@ class OrderController extends Controller
             $buyer = User::lockForUpdate()->find(Auth::id());
 
             if ($buyer->wallet_balance < $price) {
-                return redirect()->route('products.show', $product)
-                    ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
+                throw ValidationException::withMessages([
+                    'wallet' => 'موجودی کیف پول شما کافی نیست.',
+                ]);
             }
 
             $buyer->decrement('wallet_balance', $price);
@@ -111,14 +113,17 @@ class OrderController extends Controller
             $order = Order::lockForUpdate()->find($order->id);
 
             if ($order->status !== 'pending') {
-                return redirect()->route('buyer.payments')->with('error', 'این سفارش قبلاً پردازش شده است');
+                throw ValidationException::withMessages([
+                    'status' => 'این سفارش قبلاً پردازش شده است',
+                ]);
             }
 
             $buyer = User::lockForUpdate()->find(Auth::id());
 
             if ($buyer->wallet_balance < $order->amount) {
-                return redirect()->route('buyer.payments')
-                    ->with('error', 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.');
+                throw ValidationException::withMessages([
+                    'wallet' => 'موجودی کیف پول شما کافی نیست.',
+                ]);
             }
 
             $buyer->decrement('wallet_balance', $order->amount);

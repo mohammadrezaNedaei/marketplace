@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Morilog\Jalali\Jalalian;
 
 class AdminController extends Controller
@@ -202,7 +203,8 @@ class AdminController extends Controller
         $query = Product::with(['seller', 'category']);
 
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%'.$request->search.'%');
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->search);
+            $query->where('title', 'like', '%'.$search.'%', 'and');
         }
 
         if ($request->filled('status')) {
@@ -309,13 +311,17 @@ class AdminController extends Controller
             $withdrawal = WithdrawalRequest::lockForUpdate()->find($withdrawal->id);
 
             if ($withdrawal->status !== 'pending') {
-                return back()->with('error', 'این درخواست قبلاً بررسی شده است');
+                throw ValidationException::withMessages([
+                    'status' => 'این درخواست قبلاً بررسی شده است',
+                ]);
             }
 
             $seller = User::lockForUpdate()->find($withdrawal->user_id);
 
             if ($seller->wallet_balance < $withdrawal->amount) {
-                return back()->with('error', 'موجودی فروشنده کافی نیست');
+                throw ValidationException::withMessages([
+                    'balance' => 'موجودی فروشنده کافی نیست',
+                ]);
             }
 
             $seller->decrement('wallet_balance', $withdrawal->amount);
@@ -385,8 +391,12 @@ class AdminController extends Controller
 
         if ($order->status === 'paid' && $request->status === 'canceled') {
             DB::transaction(function () use ($order) {
-                User::where('id', $order->user_id)->increment('wallet_balance', $order->amount);
-                User::where('id', $order->product->seller_id)->decrement('wallet_balance', $order->amount);
+                $order = Order::lockForUpdate()->find($order->id);
+                $buyer = User::lockForUpdate()->find($order->user_id);
+                $seller = User::lockForUpdate()->find($order->product->seller_id);
+
+                $buyer->increment('wallet_balance', $order->amount);
+                $seller->decrement('wallet_balance', $order->amount);
 
                 WalletTransaction::create([
                     'user_id' => $order->user_id,
@@ -471,7 +481,9 @@ class AdminController extends Controller
             $cardTransfer = CardTransferRequest::lockForUpdate()->find($cardTransfer->id);
 
             if ($cardTransfer->status !== 'pending') {
-                return back()->with('error', 'این درخواست قبلاً بررسی شده است');
+                throw ValidationException::withMessages([
+                    'status' => 'این درخواست قبلاً بررسی شده است',
+                ]);
             }
 
             $user = User::lockForUpdate()->find($cardTransfer->user_id);

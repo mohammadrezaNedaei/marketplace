@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Morilog\Jalali\Jalalian;
 
 class WalletController extends Controller
@@ -257,7 +258,9 @@ class WalletController extends Controller
             $user = User::lockForUpdate()->find(Auth::id());
 
             if ($request->amount > $user->wallet_balance) {
-                return back()->withErrors(['amount' => 'موجودی کیف پول شما کافی نیست']);
+                throw ValidationException::withMessages([
+                    'amount' => 'موجودی کیف پول شما کافی نیست',
+                ]);
             }
 
             WithdrawalRequest::create([

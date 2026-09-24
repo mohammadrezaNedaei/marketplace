@@ -29,7 +29,7 @@ class WalletSecurityTest extends TestCase
 
         $response = $this->actingAs($buyer)->post("/orders/{$product->id}");
 
-        $response->assertSessionHas('error');
+        $response->assertSessionHasErrors();
         $this->assertDatabaseMissing('orders', [
             'user_id' => $buyer->id,
             'product_id' => $product->id,
