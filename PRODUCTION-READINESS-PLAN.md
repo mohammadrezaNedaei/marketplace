@@ -270,7 +270,166 @@ This plan outlines **50+ improvements** needed to make this marketplace producti
 
 ---
 
-## 🎯 Priority 4: Low (Week 4)
+## 🎯 Priority 4: Frontend Excellence (Week 4)
+
+### N. UI/UX Improvements
+
+**Why:** First impressions matter. Beautiful, intuitive UI drives conversion.
+
+**Skills to Use:**
+- **ui-reviewer** — Audit all Blade templates
+- **frontend-design** — Implement design system
+- **responsive-check** — Ensure mobile perfection
+- **accessibility-auditor** — WCAG 2.1 compliance
+
+**Files to Create:**
+
+1. **Design System**
+   - resources/css/variables.css (design tokens)
+   - resources/views/components/ui/ (reusable components)
+   - Button, Card, Input, Badge, Alert components
+
+2. **Layout Improvements**
+   - Responsive navigation (mobile hamburger menu)
+   - Sticky headers
+   - Smooth transitions
+   - Loading states
+
+3. **Product Pages**
+   - Beautiful product cards
+   - Quick buy buttons
+   - Image galleries
+   - Social proof (reviews, ratings)
+
+4. **Wallet UX**
+   - One-tap deposit amounts
+   - Visual balance display
+   - Transaction history cards
+   - Quick actions
+
+5. **Mobile Optimization**
+   - Touch-friendly buttons (44px min)
+   - Swipe gestures
+   - Bottom navigation
+   - Pull-to-refresh
+
+**Expected Impact:** 30-50% increase in user engagement
+
+---
+
+### O. User Flow Optimization
+
+**Why:** Frictionless flows = higher conversion.
+
+**Skills to Use:**
+- **ux-flow-optimizer** — Analyze and improve journeys
+- **buyer-flow-validator** — Test complete buyer journey
+- **seller-onboarding** — Validate seller experience
+
+**Optimization Areas:**
+
+1. **Registration Flow**
+   - Reduce to 2 steps max
+   - Add social login
+   - Auto-detect country
+   - Show benefits above fold
+
+2. **Purchase Flow**
+   - One-click buy option
+   - Express checkout
+   - Saved payment methods
+   - Progress indicators
+
+3. **Wallet Flow**
+   - Preset deposit amounts
+   - Quick balance check
+   - Easy withdrawal
+   - Transaction search
+
+4. **Search & Discovery**
+   - Instant search
+   - Filter chips
+   - Sort options
+   - Recently viewed
+
+**A/B Testing Plan:**
+- CTA button colors
+- Product grid layouts
+- Pricing displays
+- Checkout steps
+
+**Expected Impact:** 20-40% increase in conversion
+
+---
+
+### P. Progressive Web App
+
+**Why:** App-like experience without app store.
+
+**Skill to Use:**
+- **pwa-setup** — Configure PWA features
+
+**Features to Implement:**
+
+1. **Home Screen Installation**
+   - Custom install prompt
+   - App icons (all sizes)
+   - Splash screen
+
+2. **Offline Support**
+   - Cache essential pages
+   - Offline fallback
+   - Queue actions
+
+3. **Push Notifications**
+   - Order updates
+   - Price alerts
+   - Promotions
+
+4. **Performance**
+   - Service worker
+   - Asset caching
+   - Lazy loading
+
+**Expected Impact:** 40% increase in mobile engagement
+
+---
+
+### Q. Visual Polish
+
+**Skills to Use:**
+- **ui-reviewer** — Final design audit
+- **blade-optimizer** — Template optimization
+
+**Polish Items:**
+
+1. **Animations**
+   - Page transitions
+   - Hover effects
+   - Loading spinners
+   - Success feedback
+
+2. **Empty States**
+   - Beautiful illustrations
+   - Helpful messages
+   - Clear CTAs
+
+3. **Error States**
+   - Friendly error pages
+   - Recovery options
+   - Contact support
+
+4. **Micro-interactions**
+   - Button feedback
+   - Form validation
+   - Toast notifications
+   - Confetti on success
+
+**Expected Impact:** 25% increase in user satisfaction
+
+---
+
+## 🎯 Priority 5: Low (Week 4)
 
 ### J. Documentation
 
@@ -449,10 +608,9 @@ This plan outlines **50+ improvements** needed to make this marketplace producti
 
 ---
 
-## 📚 Related Skills Installed
+## 📚 Related Skills Installed (20 Total)
 
-All these skills can help with implementation:
-
+### Backend Skills (12)
 1. **test-writer** — Generate PHPUnit tests
 2. **perf-audit** — Identify performance bottlenecks
 3. **db-migration** — Safe database changes
@@ -464,6 +622,17 @@ All these skills can help with implementation:
 9. **wallet-test-suite** — Financial operation tests
 10. **seller-onboarding** — Seller validation
 11. **buyer-flow-validator** — User journey tests
+12. **commit** — Gitmoji convention
+
+### Frontend Skills (8)
+13. **ui-reviewer** — Design consistency auditing
+14. **frontend-design** — Design system and components
+15. **design-system** — Reusable component library
+16. **blade-optimizer** — Template performance
+17. **responsive-check** — Mobile-first design
+18. **accessibility-auditor** — WCAG 2.1 compliance
+19. **ux-flow-optimizer** — User journey optimization
+20. **pwa-setup** — Progressive Web App
 
 ---
 
