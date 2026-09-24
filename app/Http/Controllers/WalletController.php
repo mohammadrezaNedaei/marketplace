@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CardTransferRequest;
+use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Models\WithdrawalRequest;
 use App\Services\NtfyService;
