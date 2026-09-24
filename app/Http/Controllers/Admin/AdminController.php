@@ -3,56 +3,64 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\CardTransferRequest;
+use App\Models\Category;
+use App\Models\Order;
+use App\Models\Product;
 use App\Models\SupportTicket;
 use App\Models\TicketMessage;
-use App\Models\Order;
+use App\Models\User;
+use App\Models\WalletTransaction;
+use App\Models\WithdrawalRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Morilog\Jalali\Jalalian;
 
 class AdminController extends Controller
 {
     public function index()
     {
-        $totalUsers    = User::count();
-        $totalSellers  = User::where('role', 'seller')->count();
-        $totalBuyers   = User::where('role', 'buyer')->count();
-        $openTickets   = SupportTicket::where('status', 'open')->count();
-        $totalProducts = \App\Models\Product::where('status', 'active')->count();
-        $totalsales    = \App\Models\Order::whereStatus('paid')->sum('amount');
-        $totalCategories = \App\Models\Category::count();
+        $totalUsers = User::count();
+        $totalSellers = User::where('role', 'seller')->count();
+        $totalBuyers = User::where('role', 'buyer')->count();
+        $openTickets = SupportTicket::where('status', 'open')->count();
+        $totalProducts = Product::where('status', 'active')->count();
+        $totalsales = Order::whereStatus('paid')->sum('amount');
+        $totalCategories = Category::count();
 
         $recentActivities = collect()
             ->merge(
-                User::latest('created_at')->take(5)->get()->map(fn($u) => [
-                    'type'       => 'user',
-                    'icon'       => '👤',
-                    'text'       => $u->username . ' ثبت‌نام کرد',
+                User::latest('created_at')->take(5)->get()->map(fn ($u) => [
+                    'type' => 'user',
+                    'icon' => '👤',
+                    'text' => $u->username.' ثبت‌نام کرد',
                     'created_at' => $u->created_at,
                 ])
             )
             ->merge(
-                \App\Models\Order::with('user')->latest('created_at')->take(5)->get()->map(fn($o) => [
-                    'type'       => 'order',
-                    'icon'       => '🛍',
-                    'text'       => ($o->user->username ?? '—') . ' یک سفارش ثبت کرد',
+                Order::with('user')->latest('created_at')->take(5)->get()->map(fn ($o) => [
+                    'type' => 'order',
+                    'icon' => '🛍',
+                    'text' => ($o->user->username ?? '—').' یک سفارش ثبت کرد',
                     'created_at' => $o->created_at,
                 ])
             )
             ->merge(
-                \App\Models\Product::with('seller')->latest('created_at')->take(5)->get()->map(fn($p) => [
-                    'type'       => 'product',
-                    'icon'       => '📦',
-                    'text'       => ($p->seller->username ?? '—') . ' محصول جدید اضافه کرد: ' . $p->title,
+                Product::with('seller')->latest('created_at')->take(5)->get()->map(fn ($p) => [
+                    'type' => 'product',
+                    'icon' => '📦',
+                    'text' => ($p->seller->username ?? '—').' محصول جدید اضافه کرد: '.$p->title,
                     'created_at' => $p->created_at,
                 ])
             )
             ->merge(
-                SupportTicket::with('user')->latest('created_at')->take(5)->get()->map(fn($t) => [
-                    'type'       => 'ticket',
-                    'icon'       => '🎫',
-                    'text'       => ($t->user->username ?? '—') . ' تیکت جدید باز کرد',
+                SupportTicket::with('user')->latest('created_at')->take(5)->get()->map(fn ($t) => [
+                    'type' => 'ticket',
+                    'icon' => '🎫',
+                    'text' => ($t->user->username ?? '—').' تیکت جدید باز کرد',
                     'created_at' => $t->created_at,
                 ])
             )
@@ -77,7 +85,8 @@ class AdminController extends Controller
         $query = User::query();
 
         if ($request->filled('search')) {
-            $query->where('username', 'like', '%' . $request->search . '%');
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->search);
+            $query->where('username', 'like', '%'.$search.'%', 'and');
         }
 
         if ($request->filled('role')) {
@@ -97,17 +106,24 @@ class AdminController extends Controller
     public function updateUser(Request $request, User $user)
     {
         $request->validate([
-            'username' => 'required|string|max:50|unique:users,username,' . $user->id,
-            'phone'    => 'nullable|string|max:20',
-            'role'     => 'required|in:buyer,seller,admin',
+            'username' => 'required|string|max:50|unique:users,username,'.$user->id,
+            'phone' => 'nullable|string|max:20',
+            'role' => 'required|in:buyer,seller,admin',
             'password' => 'nullable|string|min:6',
-            'status'   => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
         ]);
 
         $user->username = $request->username;
-        $user->phone    = $request->phone;
-        $user->role     = $request->role;
-        $user->status   = $request->status;
+        $user->phone = $request->phone;
+
+        if ($user->role === 'admin' && $request->role !== 'admin') {
+            if (User::where('role', 'admin')->count() <= 1) {
+                return back()->with('error', 'نمی‌توانید آخرین ادمین را تنزل دهید');
+            }
+        }
+
+        $user->role = $request->role;
+        $user->status = $request->status;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
@@ -148,6 +164,7 @@ class AdminController extends Controller
     public function showTicket(SupportTicket $ticket)
     {
         $ticket->load(['user', 'messages.sender']);
+
         return view('admin.show-ticket', compact('ticket'));
     }
 
@@ -159,8 +176,8 @@ class AdminController extends Controller
 
         TicketMessage::create([
             'ticket_id' => $ticket->id,
-            'user_id'   => Auth::id(),
-            'message'   => $request->message,
+            'user_id' => Auth::id(),
+            'message' => $request->message,
         ]);
 
         $ticket->status = 'answered';
@@ -183,10 +200,11 @@ class AdminController extends Controller
 
     public function products(Request $request)
     {
-        $query = \App\Models\Product::with(['seller', 'category']);
+        $query = Product::with(['seller', 'category']);
 
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->search);
+            $query->where('title', 'like', '%'.$search.'%', 'and');
         }
 
         if ($request->filled('status')) {
@@ -198,45 +216,47 @@ class AdminController extends Controller
         return view('admin.products', compact('products'));
     }
 
-    public function editProduct(\App\Models\Product $product)
+    public function editProduct(Product $product)
     {
-        $categories = \App\Models\Category::all();
+        $categories = Category::all();
+
         return view('admin.edit-product', compact('product', 'categories'));
     }
 
-    public function updateProduct(Request $request, \App\Models\Product $product)
+    public function updateProduct(Request $request, Product $product)
     {
         $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'price'          => 'required|numeric|min:0',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'category_id'    => 'required|exists:categories,id',
-            'status'         => 'required|in:active,inactive',
+            'category_id' => 'required|exists:categories,id',
+            'status' => 'required|in:active,inactive',
         ]);
 
-        $product->title          = $request->title;
-        $product->description    = $request->description;
-        $product->price          = $request->price;
+        $product->title = $request->title;
+        $product->description = $request->description;
+        $product->price = $request->price;
         $product->discount_price = $request->discount_price;
-        $product->category_id    = $request->category_id;
-        $product->status         = $request->status;
+        $product->category_id = $request->category_id;
+        $product->status = $request->status;
         $product->save();
 
         return redirect()->route('admin.products')
             ->with('success', 'محصول با موفقیت ویرایش شد');
     }
 
-    public function deleteProduct(\App\Models\Product $product)
+    public function deleteProduct(Product $product)
     {
         $product->delete();
+
         return redirect()->route('admin.products')
             ->with('success', 'محصول با موفقیت حذف شد');
     }
 
     public function withdrawals(Request $request)
     {
-        $query = \App\Models\WithdrawalRequest::with('user')->latest('created_at');
+        $query = WithdrawalRequest::with('user')->latest('created_at');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -277,7 +297,7 @@ class AdminController extends Controller
                 '۹' => '9',
             ]);
 
-            return \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $normalized)
+            return Jalalian::fromFormat('Y/m/d', $normalized)
                 ->toCarbon()
                 ->format('Y-m-d');
         } catch (\Exception $e) {
@@ -285,28 +305,34 @@ class AdminController extends Controller
         }
     }
 
-    public function approveWithdrawal(\App\Models\WithdrawalRequest $withdrawal)
+    public function approveWithdrawal(WithdrawalRequest $withdrawal)
     {
-        if ($withdrawal->status !== 'pending') {
-            return back()->with('error', 'این درخواست قبلاً بررسی شده است');
-        }
+        DB::transaction(function () use ($withdrawal) {
+            $withdrawal = WithdrawalRequest::lockForUpdate()->find($withdrawal->id);
 
-        $seller = $withdrawal->user;
+            if ($withdrawal->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'status' => 'این درخواست قبلاً بررسی شده است',
+                ]);
+            }
 
-        if ($seller->wallet_balance < $withdrawal->amount) {
-            return back()->with('error', 'موجودی فروشنده کافی نیست');
-        }
+            $seller = User::lockForUpdate()->find($withdrawal->user_id);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($withdrawal, $seller) {
+            if ($seller->wallet_balance < $withdrawal->amount) {
+                throw ValidationException::withMessages([
+                    'balance' => 'موجودی فروشنده کافی نیست',
+                ]);
+            }
+
             $seller->decrement('wallet_balance', $withdrawal->amount);
 
-            \App\Models\WalletTransaction::create([
+            WalletTransaction::create([
                 'user_id' => $seller->id,
-                'type'    => 'withdrawal',
-                'amount'  => $withdrawal->amount,
+                'type' => 'withdrawal',
+                'amount' => $withdrawal->amount,
             ]);
 
-            $withdrawal->status      = 'approved';
+            $withdrawal->status = 'approved';
             $withdrawal->reviewed_at = now();
             $withdrawal->save();
         });
@@ -314,13 +340,13 @@ class AdminController extends Controller
         return back()->with('success', 'درخواست برداشت تایید شد');
     }
 
-    public function rejectWithdrawal(\App\Models\WithdrawalRequest $withdrawal)
+    public function rejectWithdrawal(WithdrawalRequest $withdrawal)
     {
         if ($withdrawal->status !== 'pending') {
             return back()->with('error', 'این درخواست قبلاً بررسی شده است');
         }
 
-        $withdrawal->status      = 'rejected';
+        $withdrawal->status = 'rejected';
         $withdrawal->reviewed_at = now();
         $withdrawal->save();
 
@@ -357,21 +383,49 @@ class AdminController extends Controller
     public function updateOrderStatus(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,completed,canceled',
+            'status' => 'required|in:paid,processing,completed,canceled',
         ], [
             'status.required' => 'وضعیت سفارش الزامی است',
-            'status.in'       => 'وضعیت سفارش نامعتبر است',
+            'status.in' => 'وضعیت سفارش نامعتبر است',
         ]);
 
-        $order->status = $request->status;
-        $order->save();
+        if ($order->status === 'paid' && $request->status === 'canceled') {
+            DB::transaction(function () use ($order) {
+                $order = Order::lockForUpdate()->find($order->id);
+                $buyer = User::lockForUpdate()->find($order->user_id);
+                $seller = User::lockForUpdate()->find($order->product->seller_id);
+
+                $buyer->increment('wallet_balance', $order->amount);
+                $seller->decrement('wallet_balance', $order->amount);
+
+                WalletTransaction::create([
+                    'user_id' => $order->user_id,
+                    'type' => 'deposit',
+                    'amount' => $order->amount,
+                    'order_id' => $order->id,
+                ]);
+
+                WalletTransaction::create([
+                    'user_id' => $order->product->seller_id,
+                    'type' => 'income',
+                    'amount' => -$order->amount,
+                    'order_id' => $order->id,
+                ]);
+
+                $order->status = 'canceled';
+                $order->save();
+            });
+        } else {
+            $order->status = $request->status;
+            $order->save();
+        }
 
         return back()->with('success', 'وضعیت سفارش بروزرسانی شد');
     }
 
     public function activityLog(Request $request)
     {
-        $query = \Illuminate\Support\Facades\DB::table('activity_log_view');
+        $query = DB::table('activity_log_view');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -387,12 +441,16 @@ class AdminController extends Controller
 
         if ($request->filled('from_date')) {
             $fromDate = $this->jalaliToGregorian($request->from_date);
-            if ($fromDate) $query->whereDate('created_at', '>=', $fromDate);
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', $fromDate);
+            }
         }
 
         if ($request->filled('to_date')) {
             $toDate = $this->jalaliToGregorian($request->to_date);
-            if ($toDate) $query->whereDate('created_at', '<=', $toDate);
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', $toDate);
+            }
         }
 
         $activityLog = $query->orderByDesc('created_at')->paginate(9)->withQueryString();
@@ -402,14 +460,14 @@ class AdminController extends Controller
 
     public function cardTransfers(Request $request)
     {
-        $query = \App\Models\CardTransferRequest::with('user')->latest('created_at');
+        $query = CardTransferRequest::with('user')->latest('created_at');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         if ($request->filled('search')) {
-            $query->whereHas('user', fn($u) => $u->where('username', 'like', '%' . $request->search . '%'));
+            $query->whereHas('user', fn ($u) => $u->where('username', 'like', '%'.$request->search.'%'));
         }
 
         $cardTransfers = $query->paginate(20)->withQueryString();
@@ -417,26 +475,30 @@ class AdminController extends Controller
         return view('admin.card-transfers', compact('cardTransfers'));
     }
 
-    public function approveCardTransfer(\App\Models\CardTransferRequest $cardTransfer)
+    public function approveCardTransfer(CardTransferRequest $cardTransfer)
     {
-        if ($cardTransfer->status !== 'pending') {
-            return back()->with('error', 'این درخواست قبلاً بررسی شده است');
-        }
+        DB::transaction(function () use ($cardTransfer) {
+            $cardTransfer = CardTransferRequest::lockForUpdate()->find($cardTransfer->id);
 
-        $user = $cardTransfer->user;
+            if ($cardTransfer->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'status' => 'این درخواست قبلاً بررسی شده است',
+                ]);
+            }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($cardTransfer, $user) {
+            $user = User::lockForUpdate()->find($cardTransfer->user_id);
+
             $user->increment('wallet_balance', $cardTransfer->amount);
 
-            \App\Models\WalletTransaction::create([
-                'user_id'        => $user->id,
-                'type'           => 'deposit',
-                'amount'         => $cardTransfer->amount,
-                'gateway'        => 'card_transfer',
-                'transaction_id' => 'CT-' . $cardTransfer->id,
+            WalletTransaction::create([
+                'user_id' => $user->id,
+                'type' => 'deposit',
+                'amount' => $cardTransfer->amount,
+                'gateway' => 'card_transfer',
+                'transaction_id' => 'CT-'.$cardTransfer->id,
             ]);
 
-            $cardTransfer->status      = 'approved';
+            $cardTransfer->status = 'approved';
             $cardTransfer->reviewed_at = now();
             $cardTransfer->save();
         });
@@ -444,14 +506,14 @@ class AdminController extends Controller
         return back()->with('success', 'درخواست تایید شد و کیف پول کاربر شارژ شد');
     }
 
-    public function rejectCardTransfer(Request $request, \App\Models\CardTransferRequest $cardTransfer)
+    public function rejectCardTransfer(Request $request, CardTransferRequest $cardTransfer)
     {
         if ($cardTransfer->status !== 'pending') {
             return back()->with('error', 'این درخواست قبلاً بررسی شده است');
         }
 
-        $cardTransfer->status      = 'rejected';
-        $cardTransfer->admin_note  = $request->admin_note;
+        $cardTransfer->status = 'rejected';
+        $cardTransfer->admin_note = $request->admin_note;
         $cardTransfer->reviewed_at = now();
         $cardTransfer->save();
 

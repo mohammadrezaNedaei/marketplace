@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\Product;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Morilog\Jalali\Jalalian;
 
 class ProductController extends Controller
 {
@@ -23,6 +24,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::all();
+
         return view('seller.products.create', compact('categories'));
     }
 
@@ -38,11 +40,11 @@ class ProductController extends Controller
             'file' => 'nullable|file|max:20480',
         ]);
 
-        $picturePath = $request->file('picture')->store('products/pictures', 'public');
+        $picturePath = $request->file('picture')->store('products/pictures', 'local');
 
         $filePath = null;
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('products/files', 'public');
+            $filePath = $request->file('file')->store('products/files', 'local');
         }
 
         Product::create([
@@ -67,6 +69,7 @@ class ProductController extends Controller
         }
 
         $categories = Category::all();
+
         return view('seller.products.edit', compact('product', 'categories'));
     }
 
@@ -88,13 +91,13 @@ class ProductController extends Controller
 
         // اگر عکس جدید آپلود شد
         if ($request->hasFile('picture')) {
-            $picturePath = $request->file('picture')->store('products/pictures', 'public');
+            $picturePath = $request->file('picture')->store('products/pictures', 'local');
             $product->picture_url = $picturePath;
         }
 
         // اگر فایل جدید آپلود شد
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('products/files', 'public');
+            $filePath = $request->file('file')->store('products/files', 'local');
             $product->file_url = $filePath;
         }
 
@@ -103,7 +106,6 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->discount_price = $request->discount_price;
         $product->category_id = $request->category_id;
-        $product->status = $request->status;
         $product->save();
 
         return redirect()->route('seller.dashboard')->with('success', 'محصول با موفقیت ویرایش شد');
@@ -158,7 +160,7 @@ class ProductController extends Controller
             ->orderByDesc('views')
             ->limit(5)
             ->get()
-            ->map(fn($p) => [
+            ->map(fn ($p) => [
                 'title' => $p->title,
                 'views' => $p->views,
                 'sales' => $p->sales_count,
@@ -178,20 +180,17 @@ class ProductController extends Controller
     {
         $sellerId = Auth::id();
 
-
         $query = Order::whereHas('product', function ($q) use ($sellerId) {
             $q->where('seller_id', $sellerId);
         })
             ->with('product');
 
-
         if ($request->filled('search')) {
 
             $query->whereHas('product', function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%');
+                $q->where('title', 'like', '%'.$request->search.'%');
             });
         }
-
 
         if ($request->filled('from_date')) {
 
@@ -202,7 +201,6 @@ class ProductController extends Controller
             }
         }
 
-
         if ($request->filled('to_date')) {
 
             $toDate = $this->jalaliToGregorian($request->to_date);
@@ -212,15 +210,14 @@ class ProductController extends Controller
             }
         }
 
-
         $orders = $query
             ->latest('created_at')
             ->paginate(10)
             ->withQueryString();
 
-
         return view('seller.orders', compact('orders'));
     }
+
     private function jalaliToGregorian(string $jalaliDate): ?string
     {
         try {
@@ -237,7 +234,7 @@ class ProductController extends Controller
                 '۹' => '9',
             ]);
 
-            return \Morilog\Jalali\Jalalian::fromFormat('Y/m/d', $normalized)
+            return Jalalian::fromFormat('Y/m/d', $normalized)
                 ->toCarbon()
                 ->format('Y-m-d');
         } catch (\Exception $e) {

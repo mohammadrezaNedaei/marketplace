@@ -17,7 +17,7 @@ class ReviewController extends Controller
         }
 
         $validated = $request->validate([
-            'rating'  => 'required|integer|min:1|max:5',
+            'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|max:1000',
         ]);
 
@@ -36,7 +36,7 @@ class ReviewController extends Controller
                 'rating' => $validated['rating'],
                 'comment' => $validated['comment'],
                 'verified_purchase' => $verifiedPurchase,
-                'approved' => true,
+                'approved' => false,
             ]);
 
             return back()->with('success', 'نظر شما با موفقیت ویرایش شد');
@@ -48,7 +48,7 @@ class ReviewController extends Controller
             'rating' => $validated['rating'],
             'comment' => $validated['comment'],
             'verified_purchase' => $verifiedPurchase,
-            'approved' => true,
+            'approved' => false,
         ]);
 
         return back()->with('success', 'نظر شما با موفقیت ثبت شد');
@@ -56,6 +56,10 @@ class ReviewController extends Controller
 
     public function reply(Request $request, Review $review)
     {
+        if (Auth::user()->role !== 'buyer') {
+            abort(403);
+        }
+
         $request->validate([
             'comment' => 'required|string|max:1000',
         ]);
@@ -65,7 +69,7 @@ class ReviewController extends Controller
             'user_id' => Auth::id(),
             'answer_to_id' => $review->id,
             'comment' => $request->comment,
-            'approved' => true,
+            'approved' => false,
             'verified_purchase' => false,
         ]);
 
